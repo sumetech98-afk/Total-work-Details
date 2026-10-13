@@ -33,6 +33,18 @@
   .autosave-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .autosave-actions button { margin: 0; padding: 8px 14px; font-size: 12px; }
 
+  /* Folder connection banner */
+  .folder-banner { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 10px; padding: 12px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .folder-banner.connected { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-color: #2563eb; }
+  .folder-info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; }
+  .folder-icon { font-size: 22px; }
+  .folder-text { font-size: 13px; font-weight: 700; color: #92400e; }
+  .folder-banner.connected .folder-text { color: #1e40af; }
+  .folder-sub { font-size: 11px; color: #78350f; margin-top: 2px; }
+  .folder-banner.connected .folder-sub { color: #1e3a8a; }
+  .folder-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .folder-actions button { margin: 0; padding: 8px 14px; font-size: 12px; }
+
   .card { background: #fff; border-radius: 10px; padding: 18px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
   .card h2 { color: #1a4d8f; font-size: 17px; margin-bottom: 12px; border-bottom: 2px solid #e8eef7; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
   .card h2 .head-actions { display: flex; gap: 8px; }
@@ -53,6 +65,7 @@
   .btn-whatsapp { background: #25D366; } .btn-whatsapp:hover { background: #1da851; }
   .btn-whatsapp-dark { background: #128C7E; } .btn-whatsapp-dark:hover { background: #0d6b60; }
   .btn-excel { background: #217346; } .btn-excel:hover { background: #185c37; }
+  .btn-pdf { background: #c0392b; } .btn-pdf:hover { background: #96281b; }
 
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px; }
   .stat-box { background: #fff; border-radius: 10px; padding: 14px 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #1a4d8f; }
@@ -144,11 +157,11 @@
   .toast.warn { background: #ea580c; }
   .toast.wa { background: #25D366; }
   .toast.excel { background: #217346; }
+  .toast.pdf { background: #c0392b; }
 
   .save-flash { animation: flash 0.5s; }
   @keyframes flash { 0% { background-color: #dcfce7; } 100% { background-color: transparent; } }
 
-  /* Excel Modal */
   .excel-options { display: grid; gap: 12px; margin: 15px 0; }
   .excel-option { border: 2px solid #e2e8f0; border-radius: 8px; padding: 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
   .excel-option:hover { border-color: #217346; background: #f0fdf4; }
@@ -166,8 +179,8 @@
     .company-name-display { font-size: 16px; }
     .company-selector { flex-direction: column; align-items: stretch; }
     .company-selector select { min-width: 100%; }
-    .autosave-bar { flex-direction: column; align-items: stretch; }
-    .autosave-actions button { flex: 1; }
+    .autosave-bar, .folder-banner { flex-direction: column; align-items: stretch; }
+    .autosave-actions button, .folder-actions button { flex: 1; }
     .stats { grid-template-columns: repeat(2, 1fr); }
     .tab-total-box .tt-value { font-size: 18px; }
   }
@@ -176,7 +189,23 @@
 <body>
 <div class="container">
   <h1>🏗️ Fabrication Work Manager</h1>
-  <p class="subtitle">Multi-company records with automatic saving</p>
+  <p class="subtitle">Multi-company records with automatic saving + PDF/WhatsApp</p>
+
+  <!-- FOLDER CONNECTION BANNER -->
+  <div class="folder-banner" id="folderBanner">
+    <div class="folder-info">
+      <span class="folder-icon" id="folderIcon">📁</span>
+      <div>
+        <div class="folder-text" id="folderText">📁 Auto-Save Folder: Not Connected</div>
+        <div class="folder-sub" id="folderSub">Connect a folder → Excel files will auto-save there</div>
+      </div>
+    </div>
+    <div class="folder-actions">
+      <button class="btn-blue" onclick="connectFolder()" id="folderConnectBtn">📁 Connect Folder</button>
+      <button class="btn-green" onclick="autoSaveExcelToFolder()" id="folderAutoSaveBtn" style="display:none;">💾 Auto-Save Excel</button>
+      <button class="btn-gray" onclick="disconnectFolder()" id="folderDisconnectBtn" style="display:none;">Disconnect</button>
+    </div>
+  </div>
 
   <!-- AUTO-SAVE STATUS BAR -->
   <div class="autosave-bar" id="autosaveBar">
@@ -189,9 +218,10 @@
     </div>
     <div class="autosave-actions">
       <button class="btn-green" onclick="manualSave()">💾 Save Now</button>
-      <button class="btn-excel" onclick="openExcelModal()">📊 Download Excel</button>
-      <button class="btn-blue" onclick="exportSingleFile()">📤 Export Data File</button>
-      <button class="btn-orange" onclick="document.getElementById('importFile').click()">📥 Import Data File</button>
+      <button class="btn-excel" onclick="downloadExcel()">📊 Excel</button>
+      <button class="btn-pdf" onclick="downloadPDF()">📄 PDF</button>
+      <button class="btn-blue" onclick="exportSingleFile()">📤 Backup</button>
+      <button class="btn-orange" onclick="document.getElementById('importFile').click()">📥 Restore</button>
       <input type="file" id="importFile" accept=".json,.fab" style="display:none" onchange="importSingleFile(event)">
     </div>
   </div>
@@ -212,8 +242,9 @@
       <div class="company-owner-display" id="companyOwnerDisplay">Add a company to get started</div>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button onclick="editActiveCompany()">✏️ Edit Details</button>
-      <button class="btn-whatsapp" onclick="openWhatsAppModal()" style="background:#25D366; border:1px solid rgba(255,255,255,0.4);">📱 Share on WhatsApp</button>
+      <button onclick="editActiveCompany()">✏️ Edit</button>
+      <button class="btn-pdf" onclick="downloadPDF()" style="background:#c0392b; border:1px solid rgba(255,255,255,0.4);">📄 PDF</button>
+      <button class="btn-whatsapp" onclick="shareViaWhatsAppWithPDF()" style="background:#25D366; border:1px solid rgba(255,255,255,0.4);">📱 WhatsApp + PDF</button>
     </div>
   </div>
 
@@ -223,20 +254,20 @@
     <div class="stat-box green"><div class="label">💵 Base Earnings</div><div class="value" id="statEarning">₹0</div></div>
     <div class="stat-box purple"><div class="label">📊 Total GST</div><div class="value" id="statGst">₹0</div></div>
     <div class="stat-box green"><div class="label">✅ Grand Total</div><div class="value" id="statGrand">₹0</div><div class="sub">Base + GST</div></div>
-    <div class="stat-box orange"><div class="label">💰 Advance</div><div class="value" id="statAdvance">₹0</div><div class="sub">Total received</div></div>
-    <div class="stat-box teal"><div class="label">💵 Payment</div><div class="value" id="statPayment">₹0</div><div class="sub">Total received</div></div>
-    <div class="stat-box pink"><div class="label">📥 Total Received</div><div class="value" id="statReceived">₹0</div><div class="sub">Advance + Payment</div></div>
-    <div class="stat-box red"><div class="label">⚠️ Balance Due</div><div class="value" id="statDue">₹0</div><div class="sub">Grand − Received</div></div>
+    <div class="stat-box orange"><div class="label">💰 Advance</div><div class="value" id="statAdvance">₹0</div></div>
+    <div class="stat-box teal"><div class="label">💵 Payment</div><div class="value" id="statPayment">₹0</div></div>
+    <div class="stat-box pink"><div class="label">📥 Total Received</div><div class="value" id="statReceived">₹0</div></div>
+    <div class="stat-box red"><div class="label">⚠️ Balance Due</div><div class="value" id="statDue">₹0</div></div>
   </div>
 
   <!-- Tabs -->
   <div class="section-tabs">
-    <button class="tab-btn active" onclick="showTab('work', event)">📦 Work Records</button>
+    <button class="tab-btn active" onclick="showTab('work', event)">📦 Work</button>
     <button class="tab-btn" onclick="showTab('advance', event)">💰 Advances</button>
     <button class="tab-btn" onclick="showTab('payment', event)">💵 Payments</button>
     <button class="tab-btn" onclick="showTab('summary', event)">📊 Summary</button>
     <button class="tab-btn" onclick="showTab('allCompanies', event)">🏢 All Companies</button>
-    <button class="tab-btn" onclick="showTab('excel', event)">📊 Excel Export</button>
+    <button class="tab-btn" onclick="showTab('export', event)">📤 Export</button>
   </div>
 
   <!-- WORK TAB -->
@@ -277,7 +308,7 @@
       <h2>
         <span>Work Records <span id="workCount" class="badge badge-blue"></span></span>
         <div class="head-actions">
-          <button class="btn-whatsapp" onclick="shareWorkWhatsApp()">📱 Share All</button>
+          <button class="btn-whatsapp" onclick="shareWorkWhatsApp()">📱 Share</button>
         </div>
       </h2>
       <div class="table-wrap">
@@ -307,7 +338,7 @@
       <h2>
         <span>Advance Records <span id="advCount" class="badge badge-orange"></span></span>
         <div class="head-actions">
-          <button class="btn-whatsapp" onclick="shareAdvanceWhatsApp()">📱 Share All</button>
+          <button class="btn-whatsapp" onclick="shareAdvanceWhatsApp()">📱 Share</button>
         </div>
       </h2>
       <div class="table-wrap">
@@ -338,7 +369,7 @@
       <h2>
         <span>Payment Records <span id="payCount" class="badge badge-teal"></span></span>
         <div class="head-actions">
-          <button class="btn-whatsapp" onclick="sharePaymentWhatsApp()">📱 Share All</button>
+          <button class="btn-whatsapp" onclick="sharePaymentWhatsApp()">📱 Share</button>
         </div>
       </h2>
       <div class="table-wrap">
@@ -364,8 +395,8 @@
       <h2>
         <span>📊 Full Summary (Month-wise) <span id="sumCompanyLabel" style="font-size:13px; color:#666; font-weight:normal;"></span></span>
         <div class="head-actions">
-          <button class="btn-whatsapp" onclick="shareSummaryWhatsApp()">📱 Share Summary</button>
-          <button class="btn-whatsapp-dark" onclick="shareFullReportWhatsApp()">📊 Full Report</button>
+          <button class="btn-whatsapp" onclick="shareSummaryWhatsApp()">📱 Share</button>
+          <button class="btn-pdf" onclick="downloadPDF()">📄 PDF</button>
         </div>
       </h2>
       <div class="table-wrap">
@@ -380,7 +411,6 @@
     </div>
     <div class="card">
       <button class="btn-red" onclick="clearAll()">🗑️ Clear This Company's Data</button>
-      <button class="btn-green" onclick="exportData()" style="margin-left:8px;">📥 Export CSV</button>
     </div>
   </div>
 
@@ -408,24 +438,21 @@
           <div><div style="font-size:11px; color:#666;">Balance</div><div style="font-size:16px; font-weight:700; color:#dc2626;" id="overallBalance">₹0</div></div>
         </div>
       </div>
-      <button class="btn-whatsapp" onclick="shareAllCompaniesWhatsApp()" style="margin-top:12px;">📱 Share All Companies Summary</button>
+      <button class="btn-whatsapp" onclick="shareAllCompaniesWhatsApp()" style="margin-top:12px;">📱 Share All Companies</button>
     </div>
   </div>
 
-  <!-- EXCEL EXPORT TAB -->
-  <div id="tab-excel" class="tab-content">
+  <!-- EXPORT TAB -->
+  <div id="tab-export" class="tab-content">
     <div class="card">
-      <h2>📊 Download Excel Report</h2>
-      <p style="font-size:13px; color:#666; margin-bottom:15px;">
-        Excel file download karo jisme <b>har company ki alag sheet</b> hogi aur <b>month-wise summary</b> bhi hogi.
-      </p>
+      <h2>📊 Excel Export</h2>
       <div class="excel-options">
-        <label class="excel-option" onclick="selectExcelOption(this)">
+        <label class="excel-option selected" onclick="selectExcelOption(this)">
           <input type="radio" name="excelOption" value="all" checked>
           <div class="eo-icon">📚</div>
           <div class="eo-info">
             <div class="eo-title">Full Excel Report (Recommended)</div>
-            <div class="eo-desc">Ek Excel file — har company ki alag sheet + overall summary + month-wise data</div>
+            <div class="eo-desc">Har company ki alag sheet + overall + month-wise</div>
           </div>
         </label>
         <label class="excel-option" onclick="selectExcelOption(this)">
@@ -433,33 +460,52 @@
           <div class="eo-icon">🏢</div>
           <div class="eo-info">
             <div class="eo-title">Only Current Company</div>
-            <div class="eo-desc">Sirf active company ka Excel file (work + advance + payment + month-wise)</div>
+            <div class="eo-desc">Sirf active company ka Excel</div>
           </div>
         </label>
         <label class="excel-option" onclick="selectExcelOption(this)">
           <input type="radio" name="excelOption" value="monthly">
           <div class="eo-icon">📅</div>
           <div class="eo-info">
-            <div class="eo-title">Month-wise Summary (All Companies)</div>
-            <div class="eo-desc">Har company ka month-wise breakdown — ek hi sheet me</div>
+            <div class="eo-title">Month-wise Summary (All)</div>
+            <div class="eo-desc">Har company ka month-wise breakdown</div>
           </div>
         </label>
       </div>
-      <button class="btn-excel" onclick="downloadExcel()" style="font-size:15px; padding:12px 24px; margin-top:10px;">
-        📥 Download Excel File (.xlsx)
+      <button class="btn-excel" onclick="downloadExcel()" style="font-size:15px; padding:12px 24px;">
+        📥 Download Excel (.xlsx)
       </button>
-      <div class="hint" style="margin-top:12px;">
-        💡 Excel file me har company ki alag sheet hogi — jaise "Sharma_Fabrication", "Gupta_Steel_Works" etc.
-      </div>
+      <button class="btn-green" onclick="autoSaveExcelToFolder()" style="font-size:15px; padding:12px 24px; margin-left:8px;">
+        💾 Save Excel to Connected Folder
+      </button>
     </div>
+
     <div class="card">
-      <h2>📋 Excel File Structure</h2>
+      <h2>📄 PDF Export</h2>
+      <p style="font-size:13px; color:#666; margin-bottom:12px;">
+        PDF generate karo — print karo ya WhatsApp pe bhejo.
+      </p>
+      <button class="btn-pdf" onclick="downloadPDF()" style="font-size:15px; padding:12px 24px;">
+        📄 Download PDF (Current Company)
+      </button>
+      <button class="btn-pdf" onclick="downloadAllPDF()" style="font-size:15px; padding:12px 24px; margin-left:8px;">
+        📚 Download Full PDF (All Companies)
+      </button>
+      <button class="btn-whatsapp" onclick="shareViaWhatsAppWithPDF()" style="font-size:15px; padding:12px 24px; margin-left:8px;">
+        📱 WhatsApp + PDF
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>📱 WhatsApp with PDF (How it works)</h2>
       <div style="font-size:13px; color:#555; line-height:1.8;">
-        <p><b>📚 Full Excel Report me ye sheets hongi:</b></p>
-        <p>1. <b>Overall Summary</b> — Saari companies ka total ek jagah</p>
-        <p>2. <b>Company-wise sheets</b> — Har company ka apna sheet (work + advance + payment)</p>
-        <p>3. <b>Month-wise Summary</b> — Mahine ke hisab se saara data</p>
-        <p>4. <b>Company Comparison</b> — Sabhi companies ki comparison</p>
+        <p><b>WhatsApp button dabane pe ye hoga:</b></p>
+        <p>1. ✅ PDF automatically generate + download hoga</p>
+        <p>2. ✅ WhatsApp khulega with ready message</p>
+        <p>3. 📎 Aap ko sirf <b>PDF attach</b> karna hai (WhatsApp me attachment icon se)</p>
+        <p style="margin-top:10px; padding:10px; background:#fef3c7; border-radius:6px; border-left:3px solid #f59e0b;">
+          ⚠️ <b>Note:</b> Browser ki security ki wajah se PDF automatically WhatsApp me attach nahi ho sakta. Ye WhatsApp ki limitation hai, kisi bhi website ke liye.
+        </p>
       </div>
     </div>
   </div>
@@ -500,7 +546,7 @@
     <div class="company-list" id="companyListContainer"></div>
     <div class="modal-btns">
       <button class="btn-gray" onclick="closeManageCompaniesModal()">Close</button>
-      <button class="btn-green" onclick="closeManageCompaniesModal(); openCompanyModal();">➕ Add New Company</button>
+      <button class="btn-green" onclick="closeManageCompaniesModal(); openCompanyModal();">➕ Add New</button>
     </div>
   </div>
 </div>
@@ -513,6 +559,9 @@
       <label>Send To (Optional)</label>
       <input type="text" id="waPhone" placeholder="e.g. 919876543210">
       <div class="hint">Leave empty to choose contact in WhatsApp</div>
+    </div>
+    <div id="pdfAttachNotice" style="display:none; background:#fff3cd; border:1px solid #ffc107; border-radius:6px; padding:10px; margin-bottom:10px; font-size:12px; color:#856404;">
+      📄 <b>PDF Downloaded!</b> WhatsApp me <b>attachment (📎)</b> icon dabakar PDF select karo.
     </div>
     <label>Message Preview</label>
     <div class="wa-preview">
@@ -528,17 +577,22 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- SheetJS Library for Excel -->
+<!-- SheetJS (Excel) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- jsPDF (PDF) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
 <script>
   const STORAGE_KEY = 'fab_multicompany_autosave';
   const FILE_EXTENSION = '.fab';
+  const FOLDER_DB = 'fab_folder_handle'; // For storing folder handle
 
   let data = loadData();
   let hasUnsavedChanges = false;
   let editingCompanyId = null;
   let autoSaveTimer = null;
+  let folderHandle = null; // File System Access API handle
 
   // ===== LOAD DATA =====
   function loadData() {
@@ -576,7 +630,7 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
       console.error('Save failed:', e);
-      alert('⚠️ Save failed! Storage full. Please export your data.');
+      alert('⚠️ Storage full. Please export your data.');
       return;
     }
     hasUnsavedChanges = false;
@@ -587,13 +641,10 @@
       void bar.offsetWidth;
       bar.classList.add('save-flash');
     }
-  }
-
-  function scheduleAutoSave() {
-    hasUnsavedChanges = true;
-    updateAutoSaveStatus();
-    clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(() => autoSave(), 400);
+    // Auto-save Excel to connected folder in background
+    if (folderHandle) {
+      autoSaveExcelToFolder(true); // silent mode
+    }
   }
 
   function manualSave() {
@@ -620,25 +671,235 @@
     }
   }
 
-  // ===== EXCEL EXPORT FUNCTIONS =====
-  function openExcelModal() {
-    showTab('excel', { target: document.querySelectorAll('.tab-btn')[5] });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // ===== FOLDER CONNECTION (File System Access API) =====
+  async function connectFolder() {
+    if (!window.showDirectoryPicker) {
+      alert('❌ Folder feature sirf Chrome/Edge browser me kaam karta hai.\n\nChrome ya Edge use karein.');
+      return;
+    }
+
+    try {
+      folderHandle = await window.showDirectoryPicker({
+        mode: 'readwrite',
+        startIn: 'documents'
+      });
+
+      // Ask permission
+      const permission = await folderHandle.requestPermission({ mode: 'readwrite' });
+      if (permission !== 'granted') {
+        alert('❌ Permission denied. Folder me save nahi ho payega.');
+        folderHandle = null;
+        return;
+      }
+
+      // Save handle to IndexedDB for next time
+      await saveFolderHandle(folderHandle);
+
+      updateFolderUI(true);
+      showToast('📁 Folder connected! Excel auto-save hoga yahan.', 'success');
+
+      // Immediately save Excel once
+      await autoSaveExcelToFolder();
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error(err);
+        alert('❌ Folder connect nahi hua: ' + err.message);
+      }
+    }
   }
 
+  async function disconnectFolder() {
+    if (!confirm('Folder disconnect karein? Excel auto-save band ho jayega.')) return;
+    folderHandle = null;
+    await deleteFolderHandle();
+    updateFolderUI(false);
+    showToast('📁 Folder disconnected', 'warn');
+  }
+
+  function updateFolderUI(connected) {
+    const banner = document.getElementById('folderBanner');
+    const icon = document.getElementById('folderIcon');
+    const text = document.getElementById('folderText');
+    const sub = document.getElementById('folderSub');
+    const connectBtn = document.getElementById('folderConnectBtn');
+    const autoBtn = document.getElementById('folderAutoSaveBtn');
+    const disconnBtn = document.getElementById('folderDisconnectBtn');
+
+    if (connected && folderHandle) {
+      banner.classList.add('connected');
+      icon.textContent = '✅';
+      text.textContent = '📁 Connected: ' + folderHandle.name;
+      sub.textContent = 'Excel file automatically save hogi is folder me';
+      connectBtn.style.display = 'none';
+      autoBtn.style.display = 'inline-block';
+      disconnBtn.style.display = 'inline-block';
+    } else {
+      banner.classList.remove('connected');
+      icon.textContent = '📁';
+      text.textContent = '📁 Auto-Save Folder: Not Connected';
+      sub.textContent = 'Connect a folder → Excel files will auto-save there';
+      connectBtn.style.display = 'inline-block';
+      autoBtn.style.display = 'none';
+      disconnBtn.style.display = 'none';
+    }
+  }
+
+  // IndexedDB helpers to store folder handle
+  function openFolderDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('fab_folder_db', 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('handles')) {
+          db.createObjectStore('handles');
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function saveFolderHandle(handle) {
+    try {
+      const db = await openFolderDB();
+      const tx = db.transaction('handles', 'readwrite');
+      tx.objectStore('handles').put(handle, FOLDER_DB);
+      return new Promise((res) => { tx.oncomplete = res; });
+    } catch (e) { console.warn('Cannot save folder handle:', e); }
+  }
+
+  async function loadFolderHandle() {
+    try {
+      const db = await openFolderDB();
+      const tx = db.transaction('handles', 'readonly');
+      const req = tx.objectStore('handles').get(FOLDER_DB);
+      return new Promise((res) => {
+        req.onsuccess = () => res(req.result);
+        req.onerror = () => res(null);
+      });
+    } catch (e) { return null; }
+  }
+
+  async function deleteFolderHandle() {
+    try {
+      const db = await openFolderDB();
+      const tx = db.transaction('handles', 'readwrite');
+      tx.objectStore('handles').delete(FOLDER_DB);
+    } catch (e) {}
+  }
+
+  async function restoreFolderHandle() {
+    const handle = await loadFolderHandle();
+    if (!handle) return;
+    try {
+      const permission = await handle.queryPermission({ mode: 'readwrite' });
+      if (permission === 'granted') {
+        folderHandle = handle;
+        updateFolderUI(true);
+      } else if (permission === 'prompt') {
+        folderHandle = handle;
+        // Show as connected but will need permission on save
+        updateFolderUI(true);
+      }
+    } catch (e) { console.warn('Restore folder error:', e); }
+  }
+
+  // ===== AUTO-SAVE EXCEL TO FOLDER =====
+  async function autoSaveExcelToFolder(silent = false) {
+    if (!folderHandle) {
+      if (!silent) alert('📁 Pehle folder connect karo!');
+      return;
+    }
+
+    try {
+      // Verify permission
+      let permission = await folderHandle.queryPermission({ mode: 'readwrite' });
+      if (permission !== 'granted') {
+        permission = await folderHandle.requestPermission({ mode: 'readwrite' });
+        if (permission !== 'granted') {
+          if (!silent) alert('❌ Folder permission nahi mili');
+          return;
+        }
+      }
+
+      // Generate Excel file
+      const wb = generateExcelWorkbook();
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+      // Filename
+      const now = new Date();
+      const dateStr = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0');
+      const filename = `FabricationReport_${dateStr}.xlsx`;
+
+      // Save to folder (overwrite same-day file)
+      const fileHandle = await folderHandle.getFileHandle(filename, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+
+      if (!silent) {
+        showToast('💾 Excel saved to folder: ' + filename, 'excel');
+      }
+    } catch (err) {
+      console.error('Auto-save Excel failed:', err);
+      if (!silent) alert('❌ Excel save nahi hua: ' + err.message);
+    }
+  }
+
+  // ===== GENERATE EXCEL WORKBOOK =====
+  function generateExcelWorkbook() {
+    const wb = XLSX.utils.book_new();
+    const usedNames = new Set(['Overall Summary', 'Company Comparison', 'Month-wise Summary']);
+
+    // Overall Summary
+    const wsOverall = buildOverallSheet();
+    XLSX.utils.book_append_sheet(wb, wsOverall, 'Overall Summary');
+
+    // Company Comparison
+    if (data.companies.length > 1) {
+      const wsComp = buildComparisonSheet();
+      XLSX.utils.book_append_sheet(wb, wsComp, 'Company Comparison');
+    }
+
+    // Month-wise Summary
+    const wsMonthly = buildMonthlySheet();
+    XLSX.utils.book_append_sheet(wb, wsMonthly, 'Month-wise Summary');
+
+    // Each company sheet
+    data.companies.forEach(c => {
+      let sheetName = safeSheetName(c.name);
+      let counter = 1;
+      while (usedNames.has(sheetName)) {
+        sheetName = safeSheetName(c.name).substring(0, 28) + '_' + counter;
+        counter++;
+      }
+      usedNames.add(sheetName);
+      const ws = buildCompanySheet(c);
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
+
+    return wb;
+  }
+
+  // ===== EXCEL EXPORT (Download) =====
   function selectExcelOption(el) {
     document.querySelectorAll('.excel-option').forEach(opt => opt.classList.remove('selected'));
     el.classList.add('selected');
   }
 
-  // Helper: Get month name from YYYY-MM
   function monthName(ym) {
     const [y, m] = ym.split('-');
     const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     return names[parseInt(m) - 1] + '-' + y;
   }
 
-  // Helper: Build month-wise data for a company
+  function safeSheetName(name) {
+    return String(name).replace(/[\\\/\?\*\[\]:]/g, '_').substring(0, 31) || 'Sheet';
+  }
+
   function buildCompanyMonthSummary(records) {
     const months = {};
     records.work.forEach(w => {
@@ -662,17 +923,9 @@
     return months;
   }
 
-  // Safe sheet name (Excel limit: 31 chars, no special chars)
-  function safeSheetName(name) {
-    return String(name).replace(/[\\\/\?\*\[\]:]/g, '_').substring(0, 31) || 'Sheet';
-  }
-
-  // Build a full worksheet for one company
   function buildCompanySheet(company) {
     const rec = data.records[company.id] || { work: [], advance: [], payment: [] };
     const ws_data = [];
-
-    // Company info header
     ws_data.push(['Company Details']);
     ws_data.push(['Company Name', company.name]);
     if (company.owner) ws_data.push(['Owner', company.owner]);
@@ -683,7 +936,6 @@
     ws_data.push(['Report Generated', new Date().toLocaleString()]);
     ws_data.push([]);
 
-    // WORK RECORDS
     ws_data.push(['=== WORK RECORDS ===']);
     ws_data.push(['Date', 'Work Name', 'Weight (kg)', 'Rate (₹/kg)', 'Base Amount (₹)', 'GST %', 'GST Amount (₹)', 'Total (₹)']);
     let tw = 0, tb = 0, tg = 0, tgr = 0;
@@ -697,7 +949,6 @@
     ws_data.push(['TOTAL', '', tw, '', tb, '', tg, tgr]);
     ws_data.push([]);
 
-    // ADVANCE RECORDS
     ws_data.push(['=== ADVANCE RECORDS ===']);
     ws_data.push(['Date', 'Amount (₹)', 'Note']);
     let ta = 0;
@@ -708,7 +959,6 @@
     ws_data.push(['TOTAL ADVANCE', ta, '']);
     ws_data.push([]);
 
-    // PAYMENT RECORDS
     ws_data.push(['=== PAYMENT RECORDS ===']);
     ws_data.push(['Date', 'Amount (₹)', 'Note']);
     let tp = 0;
@@ -719,7 +969,6 @@
     ws_data.push(['TOTAL PAYMENT', tp, '']);
     ws_data.push([]);
 
-    // FINAL SUMMARY
     ws_data.push(['=== FINAL SUMMARY ===']);
     ws_data.push(['Total Work (kg)', tw]);
     ws_data.push(['Base Amount (₹)', tb]);
@@ -731,38 +980,25 @@
     ws_data.push(['Balance Due (₹)', tgr - ta - tp]);
     ws_data.push([]);
 
-    // MONTH-WISE SUMMARY
     ws_data.push(['=== MONTH-WISE SUMMARY ===']);
     ws_data.push(['Month', 'Work (kg)', 'Base (₹)', 'GST (₹)', 'Grand Total (₹)', 'Advance (₹)', 'Payment (₹)', 'Balance (₹)']);
     const months = buildCompanyMonthSummary(rec);
     const keys = Object.keys(months).sort();
     keys.forEach(m => {
       const x = months[m];
-      ws_data.push([
-        monthName(m),
-        x.weight,
-        x.base,
-        x.gst,
-        x.grand,
-        x.advance,
-        x.payment,
-        x.grand - x.advance - x.payment
-      ]);
+      ws_data.push([monthName(m), x.weight, x.base, x.gst, x.grand, x.advance, x.payment, x.grand - x.advance - x.payment]);
     });
 
     return XLSX.utils.aoa_to_sheet(ws_data);
   }
 
-  // Build Overall Summary sheet
   function buildOverallSheet() {
     const ws_data = [];
     ws_data.push(['📊 OVERALL SUMMARY - ALL COMPANIES']);
     ws_data.push(['Report Generated', new Date().toLocaleString()]);
     ws_data.push(['Total Companies', data.companies.length]);
     ws_data.push([]);
-
     ws_data.push(['Company', 'Owner', 'Phone', 'Work (kg)', 'Base (₹)', 'GST (₹)', 'Grand Total (₹)', 'Advance (₹)', 'Payment (₹)', 'Received (₹)', 'Balance (₹)']);
-
     let oW = 0, oB = 0, oG = 0, oGr = 0, oA = 0, oP = 0, oBal = 0;
     data.companies.forEach(c => {
       const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
@@ -777,44 +1013,33 @@
       ws_data.push([c.name, c.owner || '', c.phone || '', tw, tb, tg, tgr, ta, tp, ta + tp, bal]);
     });
     ws_data.push(['OVERALL TOTAL', '', '', oW, oB, oG, oGr, oA, oP, oA + oP, oBal]);
-
     return XLSX.utils.aoa_to_sheet(ws_data);
   }
 
-  // Build month-wise summary for all companies
   function buildMonthlySheet() {
     const ws_data = [];
     ws_data.push(['📅 MONTH-WISE SUMMARY - ALL COMPANIES']);
     ws_data.push(['Report Generated', new Date().toLocaleString()]);
     ws_data.push([]);
     ws_data.push(['Company', 'Month', 'Work (kg)', 'Base (₹)', 'GST (₹)', 'Grand Total (₹)', 'Advance (₹)', 'Payment (₹)', 'Balance (₹)']);
-
     data.companies.forEach(c => {
       const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
       const months = buildCompanyMonthSummary(rec);
       const keys = Object.keys(months).sort();
       keys.forEach(m => {
         const x = months[m];
-        ws_data.push([
-          c.name,
-          monthName(m),
-          x.weight, x.base, x.gst, x.grand, x.advance, x.payment,
-          x.grand - x.advance - x.payment
-        ]);
+        ws_data.push([c.name, monthName(m), x.weight, x.base, x.gst, x.grand, x.advance, x.payment, x.grand - x.advance - x.payment]);
       });
       ws_data.push([]);
     });
-
     return XLSX.utils.aoa_to_sheet(ws_data);
   }
 
-  // Build Company Comparison sheet
   function buildComparisonSheet() {
     const ws_data = [];
     ws_data.push(['⚖️ COMPANY COMPARISON']);
     ws_data.push([]);
     ws_data.push(['Metric', ...data.companies.map(c => c.name)]);
-
     const rows = [
       ['Total Work (kg)', c => data.records[c.id]?.work.reduce((s, w) => s + w.weight, 0) || 0],
       ['Grand Total (₹)', c => data.records[c.id]?.work.reduce((s, w) => s + w.amount, 0) || 0],
@@ -832,21 +1057,14 @@
         return tgr - ta - tp;
       }]
     ];
-
     rows.forEach(([label, fn]) => {
       ws_data.push([label, ...data.companies.map(c => fn(c))]);
     });
-
     return XLSX.utils.aoa_to_sheet(ws_data);
   }
 
-  // MAIN DOWNLOAD FUNCTION
   function downloadExcel() {
-    if (!data.companies.length) {
-      alert('❌ Koi company nahi hai! Pehle company add karo.');
-      return;
-    }
-
+    if (!data.companies.length) { alert('❌ Koi company nahi hai!'); return; }
     const selected = document.querySelector('input[name="excelOption"]:checked')?.value || 'all';
     const wb = XLSX.utils.book_new();
     const now = new Date();
@@ -858,56 +1076,357 @@
 
     try {
       if (selected === 'active') {
-        // Only current company
         const c = getActiveCompany();
         if (!c) { alert('No active company!'); return; }
         const ws = buildCompanySheet(c);
         XLSX.utils.book_append_sheet(wb, ws, safeSheetName(c.name));
         XLSX.writeFile(wb, `${c.name.replace(/\s+/g, '_')}_Report_${ts}.xlsx`);
-
       } else if (selected === 'monthly') {
-        // Month-wise summary for all companies
         const ws = buildMonthlySheet();
         XLSX.utils.book_append_sheet(wb, ws, 'Month-wise Summary');
         XLSX.writeFile(wb, `AllCompanies_MonthlySummary_${ts}.xlsx`);
-
       } else {
-        // Full report: overall + each company + month-wise + comparison
-        // 1. Overall Summary
-        const wsOverall = buildOverallSheet();
-        XLSX.utils.book_append_sheet(wb, wsOverall, 'Overall Summary');
-
-        // 2. Company Comparison
-        if (data.companies.length > 1) {
-          const wsComp = buildComparisonSheet();
-          XLSX.utils.book_append_sheet(wb, wsComp, 'Company Comparison');
-        }
-
-        // 3. Month-wise Summary
-        const wsMonthly = buildMonthlySheet();
-        XLSX.utils.book_append_sheet(wb, wsMonthly, 'Month-wise Summary');
-
-        // 4. Each company's sheet
-        const usedNames = new Set(['Overall Summary', 'Company Comparison', 'Month-wise Summary']);
-        data.companies.forEach(c => {
-          let sheetName = safeSheetName(c.name);
-          let counter = 1;
-          while (usedNames.has(sheetName)) {
-            sheetName = safeSheetName(c.name).substring(0, 28) + '_' + counter;
-            counter++;
-          }
-          usedNames.add(sheetName);
-          const ws = buildCompanySheet(c);
-          XLSX.utils.book_append_sheet(wb, ws, sheetName);
-        });
-
-        XLSX.writeFile(wb, `FabricationReport_${data.companies.length}Companies_${ts}.xlsx`);
+        const wbFull = generateExcelWorkbook();
+        XLSX.writeFile(wbFull, `FabricationReport_${data.companies.length}Companies_${ts}.xlsx`);
       }
-
-      showToast('📊 Excel file downloaded!', 'excel');
+      showToast('📊 Excel downloaded!', 'excel');
     } catch (err) {
       console.error(err);
       alert('❌ Excel export failed: ' + err.message);
+    }
+  }
+
+  // ===== PDF GENERATION =====
+  function generatePDFForCompany(company) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+
+    const rec = data.records[company.id] || { work: [], advance: [], payment: [] };
+
+    // Header
+    doc.setFillColor(26, 77, 143);
+    doc.rect(0, 0, 210, 25, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Fabrication Work Report', 105, 12, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(company.name, 105, 20, { align: 'center' });
+
+    doc.setTextColor(0, 0, 0);
+    let y = 33;
+
+    // Company details box
+    doc.setFillColor(240, 249, 255);
+    doc.rect(14, y - 5, 182, 30, 'F');
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Company Details', 18, y + 1);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    y += 7;
+    if (company.owner) { doc.text('Owner: ' + company.owner, 18, y); y += 5; }
+    if (company.phone) { doc.text('Phone: ' + company.phone, 18, y); y += 5; }
+    if (company.gst) { doc.text('GST: ' + company.gst, 18, y); y += 5; }
+    doc.text('Report Date: ' + new Date().toLocaleString(), 18, y);
+
+    y += 12;
+
+    // Work Records
+    if (rec.work.length) {
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(26, 77, 143);
+      doc.text('Work Records', 14, y);
+      y += 3;
+
+      const workBody = rec.work.map(w => {
+        const base = w.base !== undefined ? w.base : w.amount;
+        const gst = w.gst !== undefined ? w.gst : 0;
+        const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
+        return [
+          w.date, w.name, w.weight + ' kg', '₹' + w.rate,
+          '₹' + base.toFixed(2),
+          gstPct + '%',
+          '₹' + gst.toFixed(2),
+          '₹' + w.amount.toFixed(2)
+        ];
+      });
+
+      const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+      const tb = rec.work.reduce((s, w) => s + (w.base !== undefined ? w.base : w.amount), 0);
+      const tg = rec.work.reduce((s, w) => s + (w.gst !== undefined ? w.gst : 0), 0);
+      const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+
+      workBody.push(['TOTAL', '', tw + ' kg', '', '₹' + tb.toFixed(2), '', '₹' + tg.toFixed(2), '₹' + tgr.toFixed(2)]);
+
+      doc.autoTable({
+        startY: y,
+        head: [['Date', 'Work', 'Weight', 'Rate', 'Base', 'GST%', 'GST Amt', 'Total']],
+        body: workBody,
+        theme: 'striped',
+        headStyles: { fillColor: [26, 77, 143], fontSize: 8 },
+        bodyStyles: { fontSize: 8 },
+        columnStyles: {
+          0: { cellWidth: 20 }, 1: { cellWidth: 30 }, 2: { cellWidth: 18 },
+          3: { cellWidth: 15 }, 4: { cellWidth: 22 }, 5: { cellWidth: 12 },
+          6: { cellWidth: 22 }, 7: { cellWidth: 24 }
+        },
+        margin: { left: 14, right: 14 }
+      });
+      y = doc.lastAutoTable.finalY + 10;
+    }
+
+    // Advance Records
+    if (rec.advance.length) {
+      if (y > 240) { doc.addPage(); y = 20; }
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(234, 88, 12);
+      doc.text('Advance Records', 14, y);
+      y += 3;
+
+      const advBody = rec.advance.map(a => [a.date, '₹' + a.amount.toFixed(2), a.note || '-']);
+      const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+      advBody.push(['TOTAL ADVANCE', '₹' + ta.toFixed(2), '']);
+
+      doc.autoTable({
+        startY: y,
+        head: [['Date', 'Amount', 'Note']],
+        body: advBody,
+        theme: 'striped',
+        headStyles: { fillColor: [234, 88, 12], fontSize: 9 },
+        bodyStyles: { fontSize: 9 },
+        margin: { left: 14, right: 14 }
+      });
+      y = doc.lastAutoTable.finalY + 10;
+    }
+
+    // Payment Records
+    if (rec.payment.length) {
+      if (y > 240) { doc.addPage(); y = 20; }
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(8, 145, 178);
+      doc.text('Payment Records', 14, y);
+      y += 3;
+
+      const payBody = rec.payment.map(p => [p.date, '₹' + p.amount.toFixed(2), p.note || '-']);
+      const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+      payBody.push(['TOTAL PAYMENT', '₹' + tp.toFixed(2), '']);
+
+      doc.autoTable({
+        startY: y,
+        head: [['Date', 'Amount', 'Note']],
+        body: payBody,
+        theme: 'striped',
+        headStyles: { fillColor: [8, 145, 178], fontSize: 9 },
+        bodyStyles: { fontSize: 9 },
+        margin: { left: 14, right: 14 }
+      });
+      y = doc.lastAutoTable.finalY + 10;
+    }
+
+    // Final Summary
+    if (y > 200) { doc.addPage(); y = 20; }
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(22, 163, 74);
+    doc.text('Final Summary', 14, y);
+    y += 3;
+
+    const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+    const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+    const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+    const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+    const tb = rec.work.reduce((s, w) => s + (w.base !== undefined ? w.base : w.amount), 0);
+    const tg = rec.work.reduce((s, w) => s + (w.gst !== undefined ? w.gst : 0), 0);
+
+    doc.autoTable({
+      startY: y,
+      body: [
+        ['Total Work', tw.toFixed(2) + ' kg'],
+        ['Base Amount', '₹' + tb.toFixed(2)],
+        ['Total GST', '₹' + tg.toFixed(2)],
+        ['Grand Total', '₹' + tgr.toFixed(2)],
+        ['Total Advance', '₹' + ta.toFixed(2)],
+        ['Total Payment', '₹' + tp.toFixed(2)],
+        ['Total Received', '₹' + (ta + tp).toFixed(2)],
+        ['Balance Due', '₹' + (tgr - ta - tp).toFixed(2)]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [22, 163, 74] },
+      bodyStyles: { fontSize: 10 },
+      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 70 } },
+      margin: { left: 14, right: 14 }
+    });
+
+    y = doc.lastAutoTable.finalY + 10;
+
+    // Month-wise Summary
+    const months = buildCompanyMonthSummary(rec);
+    const keys = Object.keys(months).sort();
+    if (keys.length) {
+      if (y > 200) { doc.addPage(); y = 20; }
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(124, 58, 237);
+      doc.text('Month-wise Summary', 14, y);
+      y += 3;
+
+      const monthBody = keys.map(m => {
+        const x = months[m];
+        return [
+          monthName(m),
+          x.weight.toFixed(2) + ' kg',
+          '₹' + x.base.toFixed(2),
+          '₹' + x.gst.toFixed(2),
+          '₹' + x.grand.toFixed(2),
+          '₹' + x.advance.toFixed(2),
+          '₹' + x.payment.toFixed(2),
+          '₹' + (x.grand - x.advance - x.payment).toFixed(2)
+        ];
+      });
+
+      doc.autoTable({
+        startY: y,
+        head: [['Month', 'Work', 'Base', 'GST', 'Total', 'Advance', 'Payment', 'Balance']],
+        body: monthBody,
+        theme: 'striped',
+        headStyles: { fillColor: [124, 58, 237], fontSize: 8 },
+        bodyStyles: { fontSize: 8 },
+        margin: { left: 14, right: 14 }
+      });
+      y = doc.lastAutoTable.finalY + 10;
+    }
+
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        'Generated by Fabrication Work Manager | Page ' + i + ' of ' + pageCount,
+        105, 290, { align: 'center' }
+      );
+    }
+
+    return doc;
+  }
+
+  function downloadPDF() {
+    const c = getActiveCompany();
+    if (!c) { alert('❌ Pehle company select karo!'); return; }
+    if (!data.records[c.id]?.work?.length && !data.records[c.id]?.advance?.length && !data.records[c.id]?.payment?.length) {
+      alert('❌ Is company ka koi record nahi hai!');
+      return;
+    }
+    try {
+      const doc = generatePDFForCompany(c);
+      const now = new Date();
+      const dateStr = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0');
+      const filename = `${c.name.replace(/\s+/g, '_')}_Report_${dateStr}.pdf`;
+      doc.save(filename);
+      showToast('📄 PDF downloaded: ' + filename, 'pdf');
+    } catch (err) {
+      console.error(err);
+      alert('❌ PDF generation failed: ' + err.message);
+    }
+  }
+
+  function downloadAllPDF() {
+    if (!data.companies.length) { alert('No companies!'); return; }
+    try {
+      const { jsPDF } = window.jspdf;
+      const masterDoc = new jsPDF('p', 'mm', 'a4');
+      let isFirst = true;
+
+      data.companies.forEach(c => {
+        const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+        if (!rec.work.length && !rec.advance.length && !rec.payment.length) return;
+
+        const companyDoc = generatePDFForCompany(c);
+        const pages = companyDoc.internal.getNumberOfPages();
+
+        for (let p = 1; p <= pages; p++) {
+          if (!isFirst) masterDoc.addPage();
+          isFirst = false;
+          masterDoc.setPage(masterDoc.internal.getNumberOfPages());
+          // Simpler: use addPage + setPage logic
+          companyDoc.setPage(p);
+          // Copy via output
+          // Actually easier: regenerate with shared doc
+        }
+      });
+
+      // Fallback: download one by one
+      let delay = 0;
+      data.companies.forEach((c, idx) => {
+        const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+        if (!rec.work.length && !rec.advance.length && !rec.payment.length) return;
+        setTimeout(() => {
+          const doc = generatePDFForCompany(c);
+          const dateStr = new Date().toISOString().split('T')[0];
+          doc.save(`${c.name.replace(/\s+/g, '_')}_Report_${dateStr}.pdf`);
+        }, delay);
+        delay += 500;
+      });
+      showToast('📚 All PDFs downloading...', 'pdf');
+    } catch (err) {
+      alert('❌ ' + err.message);
+    }
+  }
+
+  // ===== WHATSAPP + PDF =====
+  function shareViaWhatsAppWithPDF() {
+    const c = getActiveCompany();
+    if (!c) { alert('❌ Pehle company select karo!'); return; }
+
+    const rec = getActiveRecords();
+    if (!rec.work.length && !rec.advance.length && !rec.payment.length) {
+      alert('❌ Is company ka koi record nahi hai!');
+      return;
+    }
+
+    // 1. Generate + Download PDF
+    try {
+      const doc = generatePDFForCompany(c);
+      const dateStr = new Date().toISOString().split('T')[0];
+      const filename = `${c.name.replace(/\s+/g, '_')}_Report_${dateStr}.pdf`;
+      doc.save(filename);
+
+      // 2. Prepare WhatsApp message
+      const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+      const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+      const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+      const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+
+      let msg = `🏢 *${c.name}*\n`;
+      if (c.owner) msg += `👤 ${c.owner}\n`;
+      if (c.phone) msg += `📞 ${c.phone}\n`;
+      if (c.gst) msg += `🧾 GST: ${c.gst}\n`;
+      msg += `\n📊 *SUMMARY*\n━━━━━━━━━━━━━━━━━━\n`;
+      msg += `⚖️ Total Work: ${tw.toFixed(2)} kg\n`;
+      msg += `✅ Grand Total: ${fmt(tgr)}\n`;
+      msg += `💰 Advance: ${fmt(ta)}\n`;
+      msg += `💵 Payment: ${fmt(tp)}\n`;
+      msg += `📥 Received: ${fmt(ta + tp)}\n`;
+      msg += `⚠️ *Balance: ${fmt(tgr - ta - tp)}*\n`;
+      msg += `\n📎 *PDF Report attached*\n`;
+      msg += `📅 ${new Date().toLocaleString()}`;
+
+      document.getElementById('waPreviewText').textContent = msg;
+      document.getElementById('waPhone').value = '';
+      document.getElementById('pdfAttachNotice').style.display = 'block';
+      document.getElementById('waModal').classList.add('show');
+      showToast('📄 PDF downloaded! WhatsApp me attach karo.', 'pdf');
+    } catch (err) {
+      console.error(err);
+      alert('❌ PDF error: ' + err.message);
     }
   }
 
@@ -916,7 +1435,7 @@
     autoSave(false);
     const exportData = {
       app: 'FabricationWorkManager',
-      version: 6,
+      version: 7,
       format: 'multi-company-single-file',
       exportedAt: new Date().toISOString(),
       data: data
@@ -956,10 +1475,9 @@
             showToast('📥 Imported!', 'success');
             return;
           }
-          throw new Error('Invalid file format');
+          throw new Error('Invalid file');
         }
-        const summary = `📥 Import Data File\n\n📁 File: ${file.name}\n🏢 Companies: ${restored.companies.length}\n\n⚠️ This will REPLACE all current data.\n\nContinue?`;
-        if (!confirm(summary)) { e.target.value = ''; return; }
+        if (!confirm(`Import file: ${file.name}\nCompanies: ${restored.companies.length}\n\nThis will REPLACE all current data. Continue?`)) { e.target.value = ''; return; }
         data = restored;
         autoSave(); renderAll();
         showToast('📥 Data imported!', 'success');
@@ -1084,7 +1602,7 @@
   function renderManageCompaniesList() {
     const container = document.getElementById('companyListContainer');
     if (!data.companies.length) {
-      container.innerHTML = '<div class="empty">No companies yet. Click "Add New Company" to get started.</div>';
+      container.innerHTML = '<div class="empty">No companies yet.</div>';
       return;
     }
     container.innerHTML = data.companies.map(c => {
@@ -1166,6 +1684,7 @@
   function openWhatsAppModal(message) {
     document.getElementById('waPreviewText').textContent = message;
     document.getElementById('waPhone').value = '';
+    document.getElementById('pdfAttachNotice').style.display = 'none';
     document.getElementById('waModal').classList.add('show');
   }
 
@@ -1189,62 +1708,57 @@
     const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
     let msg = getCompanyHeader();
     msg += `📦 *WORK DETAILS*\n━━━━━━━━━━━━━━━━━━\n`;
-    msg += `📅 Date: ${w.date}\n🔧 Work: ${w.name}\n⚖️ Weight: ${w.weight} kg\n💰 Rate: ₹${w.rate}/kg\n💵 Base: ${fmt(base)}\n`;
-    if (gstPct > 0) msg += `📊 GST @ ${gstPct}%: ${fmt(gst)}\n`;
+    msg += `📅 ${w.date}\n🔧 ${w.name}\n⚖️ ${w.weight} kg × ₹${w.rate}\n💵 Base: ${fmt(base)}\n`;
+    if (gstPct > 0) msg += `📊 GST ${gstPct}%: ${fmt(gst)}\n`;
     msg += `━━━━━━━━━━━━━━━━━━\n✅ *TOTAL: ${fmt(w.amount)}*\n`;
     openWhatsAppModal(msg);
   }
 
   function shareWorkWhatsApp() {
     const rec = getActiveRecords();
-    if (!rec.work.length) { alert('No work records!'); return; }
-    let msg = getCompanyHeader();
-    msg += `📦 *WORK RECORDS*\n━━━━━━━━━━━━━━━━━━\n`;
+    if (!rec.work.length) { alert('No records!'); return; }
+    let msg = getCompanyHeader() + `📦 *WORK RECORDS*\n━━━━━━━━━━━━━━━━━━\n`;
     let tw = 0, tb = 0, tg = 0, tgr = 0;
     rec.work.forEach((w, i) => {
       const base = w.base !== undefined ? w.base : w.amount;
       const gst = w.gst !== undefined ? w.gst : 0;
       const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
       tw += w.weight; tb += base; tg += gst; tgr += w.amount;
-      msg += `\n${i + 1}. *${w.name}*\n   📅 ${w.date}\n   ⚖️ ${w.weight} kg × ₹${w.rate} = ${fmt(base)}\n`;
-      if (gstPct > 0) msg += `   📊 GST ${gstPct}% = ${fmt(gst)}\n`;
-      msg += `   ✅ *Total: ${fmt(w.amount)}*\n`;
+      msg += `\n${i + 1}. *${w.name}* (${w.date})\n   ${w.weight} kg × ₹${w.rate} = ${fmt(base)}\n`;
+      if (gstPct > 0) msg += `   GST ${gstPct}%: ${fmt(gst)}\n`;
+      msg += `   Total: *${fmt(w.amount)}*\n`;
     });
-    msg += `\n━━━━━━━━━━━━━━━━━━\n📊 *GRAND TOTAL*\n⚖️ Total Weight: ${tw.toFixed(2)} kg\n💵 Base: ${fmt(tb)}\n`;
+    msg += `\n━━━━━━━━━━━━━━━━━━\n⚖️ Weight: ${tw.toFixed(2)} kg\n💵 Base: ${fmt(tb)}\n`;
     if (tg > 0) msg += `📊 GST: ${fmt(tg)}\n`;
-    msg += `✅ *Total: ${fmt(tgr)}*\n\n📅 ${new Date().toLocaleString()}`;
+    msg += `✅ *Total: ${fmt(tgr)}*`;
     openWhatsAppModal(msg);
   }
 
   function shareAdvanceWhatsApp() {
     const rec = getActiveRecords();
-    if (!rec.advance.length) { alert('No advance records!'); return; }
-    let msg = getCompanyHeader();
-    msg += `💰 *ADVANCE RECORDS*\n━━━━━━━━━━━━━━━━━━\n`;
+    if (!rec.advance.length) { alert('No records!'); return; }
+    let msg = getCompanyHeader() + `💰 *ADVANCE RECORDS*\n━━━━━━━━━━━━━━━━━━\n`;
     let total = 0;
     rec.advance.forEach((a, i) => {
       total += a.amount;
-      msg += `\n${i + 1}. 📅 ${a.date} — *${fmt(a.amount)}*`;
-      if (a.note) msg += `\n   📝 ${a.note}`;
-      msg += `\n`;
+      msg += `\n${i + 1}. ${a.date} — *${fmt(a.amount)}*`;
+      if (a.note) msg += ` (${a.note})`;
     });
-    msg += `\n━━━━━━━━━━━━━━━━━━\n💰 *TOTAL ADVANCE: ${fmt(total)}*\n\n📅 ${new Date().toLocaleString()}`;
+    msg += `\n\n━━━━━━━━━━━━━━━━━━\n💰 *TOTAL: ${fmt(total)}*`;
     openWhatsAppModal(msg);
   }
 
   function sharePaymentWhatsApp() {
     const rec = getActiveRecords();
-    if (!rec.payment.length) { alert('No payment records!'); return; }
-    let msg = getCompanyHeader();
-    msg += `💵 *PAYMENT RECORDS*\n━━━━━━━━━━━━━━━━━━\n`;
+    if (!rec.payment.length) { alert('No records!'); return; }
+    let msg = getCompanyHeader() + `💵 *PAYMENT RECORDS*\n━━━━━━━━━━━━━━━━━━\n`;
     let total = 0;
     rec.payment.forEach((p, i) => {
       total += p.amount;
-      msg += `\n${i + 1}. 📅 ${p.date} — *${fmt(p.amount)}*`;
-      if (p.note) msg += `\n   📝 ${p.note}`;
-      msg += `\n`;
+      msg += `\n${i + 1}. ${p.date} — *${fmt(p.amount)}*`;
+      if (p.note) msg += ` (${p.note})`;
     });
-    msg += `\n━━━━━━━━━━━━━━━━━━\n💵 *TOTAL PAYMENT: ${fmt(total)}*\n\n📅 ${new Date().toLocaleString()}`;
+    msg += `\n\n━━━━━━━━━━━━━━━━━━\n💵 *TOTAL: ${fmt(total)}*`;
     openWhatsAppModal(msg);
   }
 
@@ -1263,74 +1777,35 @@
     if (!rec.work.length && !rec.advance.length && !rec.payment.length) { alert('No records!'); return; }
     const months = buildMonthlySummary();
     const keys = Object.keys(months).sort().reverse();
-    let msg = getCompanyHeader();
-    msg += `📊 *MONTHLY SUMMARY*\n━━━━━━━━━━━━━━━━━━\n`;
+    let msg = getCompanyHeader() + `📊 *MONTHLY SUMMARY*\n━━━━━━━━━━━━━━━━━━\n`;
     keys.forEach(m => {
       const x = months[m];
       const dueM = x.grand - x.advance - x.payment;
-      msg += `\n📅 *${formatMonth(m)}*\n   ⚖️ Work: ${x.weight.toFixed(2)} kg\n   💵 Base: ${fmt(x.base)}\n`;
-      if (x.gst > 0) msg += `   📊 GST: ${fmt(x.gst)}\n`;
-      msg += `   ✅ Total: ${fmt(x.grand)}\n   💰 Advance: ${fmt(x.advance)}\n   💵 Payment: ${fmt(x.payment)}\n   ⚠️ Balance: *${fmt(dueM)}*\n`;
+      msg += `\n📅 *${formatMonth(m)}*\n   Work: ${x.weight.toFixed(2)} kg\n   Base: ${fmt(x.base)}\n`;
+      if (x.gst > 0) msg += `   GST: ${fmt(x.gst)}\n`;
+      msg += `   Total: ${fmt(x.grand)}\n   Advance: ${fmt(x.advance)}\n   Payment: ${fmt(x.payment)}\n   Balance: *${fmt(dueM)}*\n`;
     });
     const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
     const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
     const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
-    msg += `\n━━━━━━━━━━━━━━━━━━\n📊 *OVERALL*\n✅ Grand Total: ${fmt(tgr)}\n💰 Advance: ${fmt(ta)}\n💵 Payment: ${fmt(tp)}\n📥 Received: ${fmt(ta + tp)}\n⚠️ *Balance: ${fmt(tgr - ta - tp)}*\n\n📅 ${new Date().toLocaleString()}`;
-    openWhatsAppModal(msg);
-  }
-
-  function shareFullReportWhatsApp() {
-    const rec = getActiveRecords();
-    if (!rec.work.length) { alert('No records!'); return; }
-    let msg = getCompanyHeader();
-    msg += `📋 *FULL REPORT*\n━━━━━━━━━━━━━━━━━━\n\n📦 *WORK RECORDS (${rec.work.length})*\n─────────────────\n`;
-    rec.work.slice().reverse().forEach((w, i) => {
-      const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
-      msg += `\n${i + 1}. ${w.name}\n   📅 ${w.date}\n   ⚖️ ${w.weight} kg × ₹${w.rate} = ${fmt(w.amount)}\n`;
-      if (gstPct > 0) msg += `   📊 (incl. ${gstPct}% GST)\n`;
-    });
-    if (rec.advance.length) {
-      msg += `\n━━━━━━━━━━━━━━━━━━\n💰 *ADVANCES (${rec.advance.length})*\n─────────────────\n`;
-      let t = 0;
-      rec.advance.slice().reverse().forEach((a, i) => {
-        t += a.amount;
-        msg += `${i + 1}. ${a.date} — ${fmt(a.amount)}${a.note ? ' (' + a.note + ')' : ''}\n`;
-      });
-      msg += `*Total Advance: ${fmt(t)}*\n`;
-    }
-    if (rec.payment.length) {
-      msg += `\n━━━━━━━━━━━━━━━━━━\n💵 *PAYMENTS (${rec.payment.length})*\n─────────────────\n`;
-      let t = 0;
-      rec.payment.slice().reverse().forEach((p, i) => {
-        t += p.amount;
-        msg += `${i + 1}. ${p.date} — ${fmt(p.amount)}${p.note ? ' (' + p.note + ')' : ''}\n`;
-      });
-      msg += `*Total Payment: ${fmt(t)}*\n`;
-    }
-    const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
-    const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
-    const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
-    msg += `\n━━━━━━━━━━━━━━━━━━\n📊 *FINAL SUMMARY*\n✅ Grand Total: ${fmt(tgr)}\n💰 Advance: ${fmt(ta)}\n💵 Payment: ${fmt(tp)}\n📥 Total Received: ${fmt(ta + tp)}\n⚠️ *Balance: ${fmt(tgr - ta - tp)}*\n\n📅 ${new Date().toLocaleString()}`;
+    msg += `\n━━━━━━━━━━━━━━━━━━\n✅ Total: ${fmt(tgr)}\n💰 Advance: ${fmt(ta)}\n💵 Payment: ${fmt(tp)}\n⚠️ *Balance: ${fmt(tgr - ta - tp)}*`;
     openWhatsAppModal(msg);
   }
 
   function shareAllCompaniesWhatsApp() {
     if (!data.companies.length) { alert('No companies!'); return; }
-    let msg = `🏢 *ALL COMPANIES SUMMARY*\n━━━━━━━━━━━━━━━━━━\n\n`;
-    let oWork = 0, oGrand = 0, oAdv = 0, oPay = 0, oDue = 0;
+    let msg = `🏢 *ALL COMPANIES*\n━━━━━━━━━━━━━━━━━━\n`;
+    let oGr = 0, oA = 0, oP = 0;
     data.companies.forEach(c => {
       const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
-      const tw = rec.work.reduce((s, w) => s + w.weight, 0);
       const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
       const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
       const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
-      const due = tgr - ta - tp;
-      oWork += tw; oGrand += tgr; oAdv += ta; oPay += tp; oDue += due;
-      msg += `📌 *${c.name}*${c.id === data.activeCompanyId ? ' ✅' : ''}\n`;
-      if (c.owner) msg += `   👤 ${c.owner}\n`;
-      msg += `   ⚖️ Work: ${tw.toFixed(2)} kg\n   ✅ Grand Total: ${fmt(tgr)}\n   💰 Advance: ${fmt(ta)}\n   💵 Payment: ${fmt(tp)}\n   ⚠️ Balance: *${fmt(due)}*\n\n`;
+      oGr += tgr; oA += ta; oP += tp;
+      msg += `\n📌 *${c.name}*${c.id === data.activeCompanyId ? ' ✅' : ''}\n`;
+      msg += `   Total: ${fmt(tgr)}\n   Balance: *${fmt(tgr - ta - tp)}*\n`;
     });
-    msg += `━━━━━━━━━━━━━━━━━━\n📊 *OVERALL TOTAL*\n🏢 Companies: ${data.companies.length}\n⚖️ Total Work: ${oWork.toFixed(2)} kg\n✅ Grand Total: ${fmt(oGrand)}\n💰 Total Advance: ${fmt(oAdv)}\n💵 Total Payment: ${fmt(oPay)}\n📥 Total Received: ${fmt(oAdv + oPay)}\n⚠️ *Total Balance: ${fmt(oDue)}*\n\n📅 ${new Date().toLocaleString()}`;
+    msg += `\n━━━━━━━━━━━━━━━━━━\n✅ Grand Total: ${fmt(oGr)}\n📥 Received: ${fmt(oA + oP)}\n⚠️ *Balance: ${fmt(oGr - oA - oP)}*`;
     openWhatsAppModal(msg);
   }
 
@@ -1341,7 +1816,7 @@
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
-    if (ev && ev.target && ev.target.classList) ev.target.classList.add('active');
+    if (ev && ev.target) ev.target.classList.add('active');
     if (name === 'allCompanies') renderAllCompaniesTable();
   }
 
@@ -1350,13 +1825,13 @@
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className = 'toast show ' + (type === 'info' ? 'info' : type === 'warn' ? 'warn' : type === 'wa' ? 'wa' : type === 'excel' ? 'excel' : '');
+    t.className = 'toast show ' + (type === 'info' ? 'info' : type === 'warn' ? 'warn' : type === 'wa' ? 'wa' : type === 'excel' ? 'excel' : type === 'pdf' ? 'pdf' : '');
     setTimeout(() => t.className = 'toast', 2500);
   }
 
   // ===== Add / Delete =====
   function addWork() {
-    if (!data.activeCompanyId) { alert('Please add or select a company first!'); return; }
+    if (!data.activeCompanyId) { alert('Please add a company first!'); return; }
     const date = document.getElementById('workDate').value;
     const name = document.getElementById('workName').value.trim();
     const weight = parseFloat(document.getElementById('workWeight').value);
@@ -1373,11 +1848,11 @@
     document.getElementById('workName').value = '';
     document.getElementById('workWeight').value = '';
     updatePreview();
-    showToast('➕ Work added & saved', 'info');
+    showToast('➕ Work added', 'info');
   }
 
   function addAdvance() {
-    if (!data.activeCompanyId) { alert('Please add or select a company first!'); return; }
+    if (!data.activeCompanyId) { alert('Please add a company first!'); return; }
     const date = document.getElementById('advDate').value;
     const amount = parseFloat(document.getElementById('advAmount').value);
     const note = document.getElementById('advNote').value.trim();
@@ -1386,11 +1861,11 @@
     autoSave(); renderAll();
     document.getElementById('advAmount').value = '';
     document.getElementById('advNote').value = '';
-    showToast('➕ Advance added & saved', 'info');
+    showToast('➕ Advance added', 'info');
   }
 
   function addPayment() {
-    if (!data.activeCompanyId) { alert('Please add or select a company first!'); return; }
+    if (!data.activeCompanyId) { alert('Please add a company first!'); return; }
     const date = document.getElementById('payDate').value;
     const amount = parseFloat(document.getElementById('payAmount').value);
     const note = document.getElementById('payNote').value.trim();
@@ -1399,11 +1874,11 @@
     autoSave(); renderAll();
     document.getElementById('payAmount').value = '';
     document.getElementById('payNote').value = '';
-    showToast('➕ Payment added & saved', 'info');
+    showToast('➕ Payment added', 'info');
   }
 
   function del(type, id) {
-    if (!confirm('Delete this record?')) return;
+    if (!confirm('Delete?')) return;
     const rec = getActiveRecords();
     rec[type] = rec[type].filter(x => x.id !== id);
     autoSave(); renderAll();
@@ -1414,7 +1889,7 @@
   function renderCompanySelector() {
     const sel = document.getElementById('companySelector');
     if (!data.companies.length) {
-      sel.innerHTML = '<option value="">-- No companies yet --</option>';
+      sel.innerHTML = '<option value="">-- No companies --</option>';
       document.getElementById('companyCount').textContent = '0 Companies';
       return;
     }
@@ -1435,8 +1910,7 @@
       if (c.phone) details.push('📞 ' + c.phone);
       if (c.address) details.push('📍 ' + c.address);
       if (c.gst) details.push('🧾 GST: ' + c.gst);
-      if (c.defaultGst) details.push('📊 GST: ' + c.defaultGst + '%');
-      ownerEl.textContent = details.length ? details.join('  •  ') : 'Click "Edit Details" to update';
+      ownerEl.textContent = details.length ? details.join('  •  ') : 'Click "Edit" to update';
     } else {
       nameEl.textContent = '🏢 No Company Selected';
       ownerEl.textContent = 'Add a company to get started';
@@ -1469,24 +1943,21 @@
 
     const wt = document.getElementById('workTable');
     document.getElementById('workCount').textContent = rec.work.length;
-    if (!rec.work.length) wt.innerHTML = '<tr><td colspan="8" class="empty">No work records yet</td></tr>';
+    if (!rec.work.length) wt.innerHTML = '<tr><td colspan="8" class="empty">No work records</td></tr>';
     else wt.innerHTML = rec.work.slice().reverse().map(w => {
       const base = w.base !== undefined ? w.base : w.amount;
       const gst = w.gst !== undefined ? w.gst : 0;
       const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
-      const gstBadge = gstPct > 0
-        ? `<span class="badge badge-purple">${gstPct}%</span>`
-        : `<span class="badge badge-orange">No GST</span>`;
-      return `
-        <tr>
-          <td>${w.date}</td><td>${w.name}</td><td>${w.weight}</td><td>₹${w.rate}</td>
-          <td>${fmt(base)}</td><td>${fmt(gst)} ${gstBadge}</td>
-          <td><b>${fmt(w.amount)}</b></td>
-          <td><div class="action-btns">
-            <button class="btn-whatsapp" onclick="shareWorkItemWhatsApp(${w.id})">📱</button>
-            <button class="btn-red" onclick="del('work',${w.id})">🗑️</button>
-          </div></td>
-        </tr>`;
+      const gstBadge = gstPct > 0 ? `<span class="badge badge-purple">${gstPct}%</span>` : `<span class="badge badge-orange">No GST</span>`;
+      return `<tr>
+        <td>${w.date}</td><td>${w.name}</td><td>${w.weight}</td><td>₹${w.rate}</td>
+        <td>${fmt(base)}</td><td>${fmt(gst)} ${gstBadge}</td>
+        <td><b>${fmt(w.amount)}</b></td>
+        <td><div class="action-btns">
+          <button class="btn-whatsapp" onclick="shareWorkItemWhatsApp(${w.id})">📱</button>
+          <button class="btn-red" onclick="del('work',${w.id})">🗑️</button>
+        </div></td>
+      </tr>`;
     }).join('');
 
     const at = document.getElementById('advanceTable');
@@ -1495,7 +1966,7 @@
     if (!rec.advance.length) at.innerHTML = '<tr><td colspan="4" class="empty">No advance records</td></tr>';
     else at.innerHTML = rec.advance.slice().reverse().map(a => `
       <tr><td>${a.date}</td><td><b>${fmt(a.amount)}</b></td><td>${a.note || '-'}</td>
-      <td><button class="btn-red" onclick="del('advance',${a.id})">🗑️ Delete</button></td></tr>`).join('');
+      <td><button class="btn-red" onclick="del('advance',${a.id})">🗑️</button></td></tr>`).join('');
     document.getElementById('advanceTotalBox').textContent = fmt(advTotal);
 
     const pt = document.getElementById('paymentTable');
@@ -1504,7 +1975,7 @@
     if (!rec.payment.length) pt.innerHTML = '<tr><td colspan="4" class="empty">No payment records</td></tr>';
     else pt.innerHTML = rec.payment.slice().reverse().map(p => `
       <tr><td>${p.date}</td><td><b>${fmt(p.amount)}</b></td><td>${p.note || '-'}</td>
-      <td><button class="btn-red" onclick="del('payment',${p.id})">🗑️ Delete</button></td></tr>`).join('');
+      <td><button class="btn-red" onclick="del('payment',${p.id})">🗑️</button></td></tr>`).join('');
     document.getElementById('paymentTotalBox').textContent = fmt(payTotal);
     document.getElementById('receivedTotalBox').textContent = fmt(advTotal + payTotal);
   }
@@ -1517,8 +1988,6 @@
     const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
     const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
     const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
-    const received = ta + tp;
-    const due = tgr - received;
 
     document.getElementById('statWork').textContent = tw.toFixed(2);
     document.getElementById('statEarning').textContent = fmt(tb);
@@ -1526,15 +1995,15 @@
     document.getElementById('statGrand').textContent = fmt(tgr);
     document.getElementById('statAdvance').textContent = fmt(ta);
     document.getElementById('statPayment').textContent = fmt(tp);
-    document.getElementById('statReceived').textContent = fmt(received);
-    document.getElementById('statDue').textContent = fmt(due);
+    document.getElementById('statReceived').textContent = fmt(ta + tp);
+    document.getElementById('statDue').textContent = fmt(tgr - ta - tp);
   }
 
   function renderSummary() {
     const months = buildMonthlySummary();
     const st = document.getElementById('summaryTable');
     const keys = Object.keys(months).sort().reverse();
-    if (!keys.length) st.innerHTML = '<tr><td colspan="8" class="empty">No data yet</td></tr>';
+    if (!keys.length) st.innerHTML = '<tr><td colspan="8" class="empty">No data</td></tr>';
     else st.innerHTML = keys.map(m => {
       const x = months[m];
       const dueM = x.grand - x.advance - x.payment;
@@ -1555,16 +2024,13 @@
   function renderAllCompaniesTable() {
     const tbl = document.getElementById('allCompaniesTable');
     if (!data.companies.length) {
-      tbl.innerHTML = '<tr><td colspan="9" class="empty">No companies yet</td></tr>';
-      document.getElementById('overallWork').textContent = '0 kg';
-      document.getElementById('overallGrand').textContent = '₹0';
-      document.getElementById('overallAdvance').textContent = '₹0';
-      document.getElementById('overallPayment').textContent = '₹0';
-      document.getElementById('overallReceived').textContent = '₹0';
-      document.getElementById('overallBalance').textContent = '₹0';
+      tbl.innerHTML = '<tr><td colspan="9" class="empty">No companies</td></tr>';
+      ['overallWork','overallGrand','overallAdvance','overallPayment','overallReceived','overallBalance'].forEach(id => {
+        document.getElementById(id).textContent = id === 'overallWork' ? '0 kg' : '₹0';
+      });
       return;
     }
-    let oWork = 0, oGrand = 0, oAdv = 0, oPay = 0, oDue = 0;
+    let oW = 0, oGr = 0, oA = 0, oP = 0;
     tbl.innerHTML = data.companies.map(c => {
       const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
       const tw = rec.work.reduce((s, w) => s + w.weight, 0);
@@ -1572,7 +2038,7 @@
       const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
       const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
       const due = tgr - ta - tp;
-      oWork += tw; oGrand += tgr; oAdv += ta; oPay += tp; oDue += due;
+      oW += tw; oGr += tgr; oA += ta; oP += tp;
       const isActive = c.id === data.activeCompanyId;
       const dueBadge = due > 0 ? 'badge-red' : 'badge-green';
       return `<tr style="${isActive ? 'background:#f0fdf4;' : ''}">
@@ -1590,47 +2056,21 @@
         </div></td>
       </tr>`;
     }).join('');
-    document.getElementById('overallWork').textContent = oWork.toFixed(2) + ' kg';
-    document.getElementById('overallGrand').textContent = fmt(oGrand);
-    document.getElementById('overallAdvance').textContent = fmt(oAdv);
-    document.getElementById('overallPayment').textContent = fmt(oPay);
-    document.getElementById('overallReceived').textContent = fmt(oAdv + oPay);
-    document.getElementById('overallBalance').textContent = fmt(oDue);
+    document.getElementById('overallWork').textContent = oW.toFixed(2) + ' kg';
+    document.getElementById('overallGrand').textContent = fmt(oGr);
+    document.getElementById('overallAdvance').textContent = fmt(oA);
+    document.getElementById('overallPayment').textContent = fmt(oP);
+    document.getElementById('overallReceived').textContent = fmt(oA + oP);
+    document.getElementById('overallBalance').textContent = fmt(oGr - oA - oP);
   }
 
   function clearAll() {
-    if (!data.activeCompanyId) { alert('No company selected!'); return; }
+    if (!data.activeCompanyId) { alert('No company!'); return; }
     const c = getActiveCompany();
-    if (!confirm(`Delete ALL records of "${c.name}"?\n\n(Company itself will remain)`)) return;
+    if (!confirm(`Delete ALL records of "${c.name}"?`)) return;
     data.records[data.activeCompanyId] = { work: [], advance: [], payment: [] };
     autoSave(); renderAll();
-    showToast('🗑️ Records cleared', 'warn');
-  }
-
-  function exportData() {
-    const c = getActiveCompany();
-    if (!c) { alert('No company selected!'); return; }
-    const rec = getActiveRecords();
-    let csv = `Company,${c.name}\n`;
-    if (c.owner) csv += `Owner,${c.owner}\n`;
-    if (c.phone) csv += `Phone,${c.phone}\n`;
-    if (c.address) csv += `Address,${c.address}\n`;
-    if (c.gst) csv += `GST,${c.gst}\n`;
-    csv += `\nType,Date,Detail,Weight,Rate,Base Amount,GST %,GST Amount,Total,Note\n`;
-    rec.work.forEach(w => {
-      const base = w.base !== undefined ? w.base : w.amount;
-      const gst = w.gst !== undefined ? w.gst : 0;
-      const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
-      csv += `Work,${w.date},${w.name},${w.weight},${w.rate},${base},${gstPct},${gst},${w.amount},\n`;
-    });
-    rec.advance.forEach(a => csv += `Advance,${a.date},,,,${a.amount},,,,${a.note||''}\n`);
-    rec.payment.forEach(p => csv += `Payment,${p.date},,,,${p.amount},,,,${p.note||''}\n`);
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${c.name.replace(/\s+/g, '_')}_data_${today()}.csv`;
-    link.click();
-    showToast('📥 CSV downloaded!', 'info');
+    showToast('🗑️ Cleared', 'warn');
   }
 
   // ===== Events =====
@@ -1641,6 +2081,7 @@
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); manualSave(); }
     if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); downloadExcel(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); downloadPDF(); }
     if (e.key === 'Escape') {
       closeCompanyModal();
       closeWhatsAppModal();
@@ -1666,13 +2107,11 @@
   renderAll();
   updateAutoSaveStatus();
   updatePreview();
-
-  // Default select first excel option
-  document.querySelector('.excel-option').classList.add('selected');
+  restoreFolderHandle();
 
   if (!data.companies.length) {
     setTimeout(() => {
-      if (confirm('👋 Welcome!\n\nNo companies yet. Add your first company now?')) {
+      if (confirm('👋 Welcome!\n\nNo companies yet. Add your first company?')) {
         openCompanyModal();
       }
     }, 500);

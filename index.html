@@ -33,7 +33,6 @@
   .autosave-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .autosave-actions button { margin: 0; padding: 8px 14px; font-size: 12px; }
 
-  /* Folder connection banner */
   .folder-banner { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 10px; padding: 12px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
   .folder-banner.connected { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-color: #2563eb; }
   .folder-info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; }
@@ -63,9 +62,9 @@
   .btn-blue { background: #2563eb; } .btn-blue:hover { background: #1d4ed8; }
   .btn-gray { background: #6b7280; } .btn-gray:hover { background: #4b5563; }
   .btn-whatsapp { background: #25D366; } .btn-whatsapp:hover { background: #1da851; }
-  .btn-whatsapp-dark { background: #128C7E; } .btn-whatsapp-dark:hover { background: #0d6b60; }
   .btn-excel { background: #217346; } .btn-excel:hover { background: #185c37; }
   .btn-pdf { background: #c0392b; } .btn-pdf:hover { background: #96281b; }
+  .btn-purple { background: #7c3aed; } .btn-purple:hover { background: #6d28d9; }
 
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px; }
   .stat-box { background: #fff; border-radius: 10px; padding: 14px 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #1a4d8f; }
@@ -128,6 +127,19 @@
   .tab-total-box.green .tt-label { color:#15803d; }
   .tab-total-box.green .tt-value { color:#16a34a; }
 
+  /* Big Total Overview */
+  .total-big-box { background: linear-gradient(135deg, #1a4d8f 0%, #2563eb 100%); color: #fff; border-radius: 12px; padding: 22px; margin-bottom: 15px; box-shadow: 0 6px 20px rgba(26,77,143,0.3); }
+  .total-big-box h3 { font-size: 16px; margin-bottom: 15px; opacity: 0.95; text-align: center; letter-spacing: 1px; }
+  .total-big-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
+  .total-big-item { text-align: center; padding: 12px; background: rgba(255,255,255,0.12); border-radius: 8px; backdrop-filter: blur(10px); }
+  .total-big-item .tb-label { font-size: 11px; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .total-big-item .tb-value { font-size: 22px; font-weight: 700; }
+  .total-big-item.highlight { background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.5); }
+  .total-big-item.green { background: rgba(34,197,94,0.3); }
+  .total-big-item.orange { background: rgba(234,88,12,0.3); }
+  .total-big-item.teal { background: rgba(8,145,178,0.3); }
+  .total-big-item.red { background: rgba(220,38,38,0.35); }
+
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 15px; }
   .modal-overlay.show { display: flex; }
   .modal { background: #fff; border-radius: 12px; padding: 22px; max-width: 480px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; }
@@ -172,6 +184,11 @@
   .excel-option .eo-desc { font-size: 11px; color: #666; }
   .excel-option input { width: auto; margin-right: 6px; }
 
+  /* Rank/position styling */
+  .rank-1 { background: linear-gradient(90deg, #fef3c7 0%, #fff 100%); border-left: 4px solid #f59e0b; }
+  .rank-2 { background: linear-gradient(90deg, #e5e7eb 0%, #fff 100%); border-left: 4px solid #9ca3af; }
+  .rank-3 { background: linear-gradient(90deg, #fed7aa 0%, #fff 100%); border-left: 4px solid #ea580c; }
+
   @media (max-width: 600px) {
     h1 { font-size: 19px; }
     .stat-box .value { font-size: 15px; }
@@ -183,6 +200,8 @@
     .autosave-actions button, .folder-actions button { flex: 1; }
     .stats { grid-template-columns: repeat(2, 1fr); }
     .tab-total-box .tt-value { font-size: 18px; }
+    .total-big-item .tb-value { font-size: 18px; }
+    .total-big-grid { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 </head>
@@ -267,6 +286,7 @@
     <button class="tab-btn" onclick="showTab('payment', event)">💵 Payments</button>
     <button class="tab-btn" onclick="showTab('summary', event)">📊 Summary</button>
     <button class="tab-btn" onclick="showTab('allCompanies', event)">🏢 All Companies</button>
+    <button class="tab-btn" onclick="showTab('totalOverview', event)">🎯 Total Overview</button>
     <button class="tab-btn" onclick="showTab('export', event)">📤 Export</button>
   </div>
 
@@ -442,6 +462,108 @@
     </div>
   </div>
 
+  <!-- 🎯 TOTAL OVERVIEW TAB (NEW) -->
+  <div id="tab-totalOverview" class="tab-content">
+    <!-- Big Hero Box -->
+    <div class="total-big-box">
+      <h3>🎯 TOTAL BUSINESS OVERVIEW — ALL COMPANIES</h3>
+      <div class="total-big-grid">
+        <div class="total-big-item">
+          <div class="tb-label">🏢 Companies</div>
+          <div class="tb-value" id="toCompanies">0</div>
+        </div>
+        <div class="total-big-item">
+          <div class="tb-label">⚖️ Total Work</div>
+          <div class="tb-value" id="toWork">0 kg</div>
+        </div>
+        <div class="total-big-item highlight">
+          <div class="tb-label">✅ Grand Total Income</div>
+          <div class="tb-value" id="toGrand">₹0</div>
+        </div>
+        <div class="total-big-item orange">
+          <div class="tb-label">💰 Total Advance</div>
+          <div class="tb-value" id="toAdvance">₹0</div>
+        </div>
+        <div class="total-big-item teal">
+          <div class="tb-label">💵 Total Payment</div>
+          <div class="tb-value" id="toPayment">₹0</div>
+        </div>
+        <div class="total-big-item green">
+          <div class="tb-label">📥 Total Received</div>
+          <div class="tb-value" id="toReceived">₹0</div>
+        </div>
+        <div class="total-big-item red">
+          <div class="tb-label">⚠️ Total Balance Due</div>
+          <div class="tb-value" id="toBalance">₹0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakdown Cards -->
+    <div class="card">
+      <h2>
+        <span>📊 Complete Breakdown</span>
+        <div class="head-actions">
+          <button class="btn-pdf" onclick="downloadTotalOverviewPDF()">📄 Download PDF</button>
+          <button class="btn-whatsapp" onclick="shareTotalOverviewWhatsApp()">📱 Share</button>
+        </div>
+      </h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Work (kg)</th>
+              <th>Base (₹)</th>
+              <th>GST (₹)</th>
+              <th>Grand Total (₹)</th>
+              <th>Advance (₹)</th>
+              <th>Payment (₹)</th>
+              <th>Received (₹)</th>
+              <th>Balance (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="totalOverviewTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Month-wise All Companies -->
+    <div class="card">
+      <h2>📅 Month-wise Breakdown (All Companies Combined)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Work (kg)</th>
+              <th>Base (₹)</th>
+              <th>GST (₹)</th>
+              <th>Grand Total (₹)</th>
+              <th>Advance (₹)</th>
+              <th>Payment (₹)</th>
+              <th>Balance (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="totalOverviewMonthTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Top Companies -->
+    <div class="card">
+      <h2>🏆 Top Companies by Income</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Company</th><th>Work (kg)</th><th>Grand Total (₹)</th><th>Balance (₹)</th></tr>
+          </thead>
+          <tbody id="totalOverviewTopTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- EXPORT TAB -->
   <div id="tab-export" class="tab-content">
     <div class="card">
@@ -482,14 +604,14 @@
 
     <div class="card">
       <h2>📄 PDF Export</h2>
-      <p style="font-size:13px; color:#666; margin-bottom:12px;">
-        PDF generate karo — print karo ya WhatsApp pe bhejo.
-      </p>
       <button class="btn-pdf" onclick="downloadPDF()" style="font-size:15px; padding:12px 24px;">
-        📄 Download PDF (Current Company)
+        📄 PDF (Current Company)
       </button>
       <button class="btn-pdf" onclick="downloadAllPDF()" style="font-size:15px; padding:12px 24px; margin-left:8px;">
-        📚 Download Full PDF (All Companies)
+        📚 PDF (All Companies)
+      </button>
+      <button class="btn-pdf" onclick="downloadTotalOverviewPDF()" style="font-size:15px; padding:12px 24px; margin-left:8px;">
+        🎯 Total Overview PDF
       </button>
       <button class="btn-whatsapp" onclick="shareViaWhatsAppWithPDF()" style="font-size:15px; padding:12px 24px; margin-left:8px;">
         📱 WhatsApp + PDF
@@ -502,9 +624,9 @@
         <p><b>WhatsApp button dabane pe ye hoga:</b></p>
         <p>1. ✅ PDF automatically generate + download hoga</p>
         <p>2. ✅ WhatsApp khulega with ready message</p>
-        <p>3. 📎 Aap ko sirf <b>PDF attach</b> karna hai (WhatsApp me attachment icon se)</p>
+        <p>3. 📎 Aap ko sirf <b>PDF attach</b> karna hai (attachment icon se)</p>
         <p style="margin-top:10px; padding:10px; background:#fef3c7; border-radius:6px; border-left:3px solid #f59e0b;">
-          ⚠️ <b>Note:</b> Browser ki security ki wajah se PDF automatically WhatsApp me attach nahi ho sakta. Ye WhatsApp ki limitation hai, kisi bhi website ke liye.
+          ⚠️ <b>Note:</b> Browser ki security ki wajah se PDF automatically WhatsApp me attach nahi ho sakta.
         </p>
       </div>
     </div>
@@ -586,13 +708,13 @@
 <script>
   const STORAGE_KEY = 'fab_multicompany_autosave';
   const FILE_EXTENSION = '.fab';
-  const FOLDER_DB = 'fab_folder_handle'; // For storing folder handle
+  const FOLDER_DB = 'fab_folder_handle';
 
   let data = loadData();
   let hasUnsavedChanges = false;
   let editingCompanyId = null;
   let autoSaveTimer = null;
-  let folderHandle = null; // File System Access API handle
+  let folderHandle = null;
 
   // ===== LOAD DATA =====
   function loadData() {
@@ -641,9 +763,8 @@
       void bar.offsetWidth;
       bar.classList.add('save-flash');
     }
-    // Auto-save Excel to connected folder in background
     if (folderHandle) {
-      autoSaveExcelToFolder(true); // silent mode
+      autoSaveExcelToFolder(true);
     }
   }
 
@@ -671,45 +792,434 @@
     }
   }
 
-  // ===== FOLDER CONNECTION (File System Access API) =====
-  async function connectFolder() {
-    if (!window.showDirectoryPicker) {
-      alert('❌ Folder feature sirf Chrome/Edge browser me kaam karta hai.\n\nChrome ya Edge use karein.');
+  // ===== 🎯 TOTAL OVERVIEW RENDER =====
+  function renderTotalOverview() {
+    if (!data.companies.length) {
+      document.getElementById('toCompanies').textContent = '0';
+      document.getElementById('toWork').textContent = '0 kg';
+      document.getElementById('toGrand').textContent = '₹0';
+      document.getElementById('toAdvance').textContent = '₹0';
+      document.getElementById('toPayment').textContent = '₹0';
+      document.getElementById('toReceived').textContent = '₹0';
+      document.getElementById('toBalance').textContent = '₹0';
+      document.getElementById('totalOverviewTable').innerHTML = '<tr><td colspan="9" class="empty">No companies</td></tr>';
+      document.getElementById('totalOverviewMonthTable').innerHTML = '<tr><td colspan="8" class="empty">No data</td></tr>';
+      document.getElementById('totalOverviewTopTable').innerHTML = '<tr><td colspan="5" class="empty">No data</td></tr>';
       return;
     }
 
-    try {
-      folderHandle = await window.showDirectoryPicker({
-        mode: 'readwrite',
-        startIn: 'documents'
+    // Overall totals
+    let oWork = 0, oBase = 0, oGst = 0, oGrand = 0, oAdvance = 0, oPayment = 0;
+
+    // Combined month-wise
+    const allMonths = {};
+
+    // Company-wise data
+    const companyStats = data.companies.map(c => {
+      const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+      const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+      const tb = rec.work.reduce((s, w) => s + (w.base !== undefined ? w.base : w.amount), 0);
+      const tg = rec.work.reduce((s, w) => s + (w.gst !== undefined ? w.gst : 0), 0);
+      const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+      const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+      const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+
+      oWork += tw; oBase += tb; oGst += tg; oGrand += tgr; oAdvance += ta; oPayment += tp;
+
+      // Merge month-wise
+      const months = buildCompanyMonthSummary(rec);
+      Object.keys(months).forEach(m => {
+        if (!allMonths[m]) allMonths[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
+        allMonths[m].weight += months[m].weight;
+        allMonths[m].base += months[m].base;
+        allMonths[m].gst += months[m].gst;
+        allMonths[m].grand += months[m].grand;
+        allMonths[m].advance += months[m].advance;
+        allMonths[m].payment += months[m].payment;
       });
 
-      // Ask permission
+      return { company: c, tw, tb, tg, tgr, ta, tp, balance: tgr - ta - tp };
+    });
+
+    // Update hero box
+    document.getElementById('toCompanies').textContent = data.companies.length;
+    document.getElementById('toWork').textContent = oWork.toFixed(2) + ' kg';
+    document.getElementById('toGrand').textContent = fmt(oGrand);
+    document.getElementById('toAdvance').textContent = fmt(oAdvance);
+    document.getElementById('toPayment').textContent = fmt(oPayment);
+    document.getElementById('toReceived').textContent = fmt(oAdvance + oPayment);
+    document.getElementById('toBalance').textContent = fmt(oGrand - oAdvance - oPayment);
+
+    // Company breakdown table
+    let html = '';
+    companyStats.forEach(s => {
+      const dueBadge = s.balance > 0 ? 'badge-red' : 'badge-green';
+      html += `<tr>
+        <td><b>${s.company.name}</b>${s.company.id === data.activeCompanyId ? ' ✅' : ''}</td>
+        <td>${s.tw.toFixed(2)}</td>
+        <td>${fmt(s.tb)}</td>
+        <td>${fmt(s.tg)}</td>
+        <td><b>${fmt(s.tgr)}</b></td>
+        <td style="color:#ea580c; font-weight:700;">${fmt(s.ta)}</td>
+        <td style="color:#0891b2; font-weight:700;">${fmt(s.tp)}</td>
+        <td style="color:#db2777; font-weight:700;">${fmt(s.ta + s.tp)}</td>
+        <td><span class="badge ${dueBadge}">${fmt(s.balance)}</span></td>
+      </tr>`;
+    });
+    // Totals row
+    html += `<tr style="background:#1a4d8f; color:#fff; font-weight:700; font-size:14px;">
+      <td>TOTAL</td>
+      <td>${oWork.toFixed(2)}</td>
+      <td>${fmt(oBase)}</td>
+      <td>${fmt(oGst)}</td>
+      <td>${fmt(oGrand)}</td>
+      <td>${fmt(oAdvance)}</td>
+      <td>${fmt(oPayment)}</td>
+      <td>${fmt(oAdvance + oPayment)}</td>
+      <td>${fmt(oGrand - oAdvance - oPayment)}</td>
+    </tr>`;
+    document.getElementById('totalOverviewTable').innerHTML = html;
+
+    // Month-wise table
+    const monthKeys = Object.keys(allMonths).sort().reverse();
+    if (!monthKeys.length) {
+      document.getElementById('totalOverviewMonthTable').innerHTML = '<tr><td colspan="8" class="empty">No data</td></tr>';
+    } else {
+      let monthHtml = '';
+      monthKeys.forEach(m => {
+        const x = allMonths[m];
+        const bal = x.grand - x.advance - x.payment;
+        const dueBadge = bal > 0 ? 'badge-red' : 'badge-green';
+        monthHtml += `<tr>
+          <td><b>${formatMonth(m)}</b></td>
+          <td>${x.weight.toFixed(2)}</td>
+          <td>${fmt(x.base)}</td>
+          <td>${fmt(x.gst)}</td>
+          <td><b>${fmt(x.grand)}</b></td>
+          <td style="color:#ea580c; font-weight:700;">${fmt(x.advance)}</td>
+          <td style="color:#0891b2; font-weight:700;">${fmt(x.payment)}</td>
+          <td><span class="badge ${dueBadge}">${fmt(bal)}</span></td>
+        </tr>`;
+      });
+      // Totals row
+      monthHtml += `<tr style="background:#1a4d8f; color:#fff; font-weight:700; font-size:14px;">
+        <td>ALL TIME TOTAL</td>
+        <td>${oWork.toFixed(2)}</td>
+        <td>${fmt(oBase)}</td>
+        <td>${fmt(oGst)}</td>
+        <td>${fmt(oGrand)}</td>
+        <td>${fmt(oAdvance)}</td>
+        <td>${fmt(oPayment)}</td>
+        <td>${fmt(oGrand - oAdvance - oPayment)}</td>
+      </tr>`;
+      document.getElementById('totalOverviewMonthTable').innerHTML = monthHtml;
+    }
+
+    // Top companies table (sorted by Grand Total)
+    const sorted = [...companyStats].sort((a, b) => b.tgr - a.tgr);
+    if (!sorted.length) {
+      document.getElementById('totalOverviewTopTable').innerHTML = '<tr><td colspan="5" class="empty">No data</td></tr>';
+    } else {
+      const medals = ['🥇', '🥈', '🥉'];
+      document.getElementById('totalOverviewTopTable').innerHTML = sorted.map((s, i) => {
+        const rankClass = i < 3 ? `rank-${i + 1}` : '';
+        const medal = i < 3 ? medals[i] : '#' + (i + 1);
+        const dueBadge = s.balance > 0 ? 'badge-red' : 'badge-green';
+        return `<tr class="${rankClass}">
+          <td><b>${medal}</b></td>
+          <td><b>${s.company.name}</b>${s.company.id === data.activeCompanyId ? ' ✅' : ''}</td>
+          <td>${s.tw.toFixed(2)} kg</td>
+          <td><b>${fmt(s.tgr)}</b></td>
+          <td><span class="badge ${dueBadge}">${fmt(s.balance)}</span></td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  // ===== 🎯 TOTAL OVERVIEW PDF =====
+  function downloadTotalOverviewPDF() {
+    if (!data.companies.length) { alert('❌ No companies!'); return; }
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+
+      // Header
+      doc.setFillColor(26, 77, 143);
+      doc.rect(0, 0, 210, 28, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('TOTAL BUSINESS OVERVIEW', 105, 13, { align: 'center' });
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('All Companies Combined Report', 105, 22, { align: 'center' });
+
+      doc.setTextColor(0, 0, 0);
+      let y = 36;
+
+      // Overall totals
+      let oWork = 0, oBase = 0, oGst = 0, oGrand = 0, oAdvance = 0, oPayment = 0;
+      const companyStats = data.companies.map(c => {
+        const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+        const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+        const tb = rec.work.reduce((s, w) => s + (w.base !== undefined ? w.base : w.amount), 0);
+        const tg = rec.work.reduce((s, w) => s + (w.gst !== undefined ? w.gst : 0), 0);
+        const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+        const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+        const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+        oWork += tw; oBase += tb; oGst += tg; oGrand += tgr; oAdvance += ta; oPayment += tp;
+        return { company: c, tw, tb, tg, tgr, ta, tp, balance: tgr - ta - tp };
+      });
+
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(26, 77, 143);
+      doc.text('Overall Business Totals', 14, y);
+      y += 3;
+
+      doc.autoTable({
+        startY: y,
+        body: [
+          ['Total Companies', String(data.companies.length)],
+          ['Total Work', oWork.toFixed(2) + ' kg'],
+          ['Base Amount', '₹' + oBase.toFixed(2)],
+          ['Total GST', '₹' + oGst.toFixed(2)],
+          ['Grand Total Income', '₹' + oGrand.toFixed(2)],
+          ['Total Advance', '₹' + oAdvance.toFixed(2)],
+          ['Total Payment', '₹' + oPayment.toFixed(2)],
+          ['Total Received', '₹' + (oAdvance + oPayment).toFixed(2)],
+          ['Total Balance Due', '₹' + (oGrand - oAdvance - oPayment).toFixed(2)]
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [26, 77, 143] },
+        bodyStyles: { fontSize: 10 },
+        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 } },
+        margin: { left: 14, right: 14 }
+      });
+      y = doc.lastAutoTable.finalY + 12;
+
+      // Company breakdown
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(22, 163, 74);
+      doc.text('Company-wise Breakdown', 14, y);
+      y += 3;
+
+      const companyBody = companyStats.map(s => [
+        s.company.name,
+        s.tw.toFixed(2) + ' kg',
+        '₹' + s.tgr.toFixed(2),
+        '₹' + s.ta.toFixed(2),
+        '₹' + s.tp.toFixed(2),
+        '₹' + s.balance.toFixed(2)
+      ]);
+      companyBody.push([
+        'TOTAL',
+        oWork.toFixed(2) + ' kg',
+        '₹' + oGrand.toFixed(2),
+        '₹' + oAdvance.toFixed(2),
+        '₹' + oPayment.toFixed(2),
+        '₹' + (oGrand - oAdvance - oPayment).toFixed(2)
+      ]);
+
+      doc.autoTable({
+        startY: y,
+        head: [['Company', 'Work', 'Grand Total', 'Advance', 'Payment', 'Balance']],
+        body: companyBody,
+        theme: 'striped',
+        headStyles: { fillColor: [22, 163, 74], fontSize: 9 },
+        bodyStyles: { fontSize: 8 },
+        columnStyles: {
+          0: { cellWidth: 45 },
+          1: { cellWidth: 22 },
+          2: { cellWidth: 28 },
+          3: { cellWidth: 25 },
+          4: { cellWidth: 25 },
+          5: { cellWidth: 27 }
+        },
+        margin: { left: 14, right: 14 },
+        didParseCell: (h) => {
+          if (h.row.index === companyBody.length - 1) {
+            h.cell.styles.fontStyle = 'bold';
+            h.cell.styles.fillColor = [240, 249, 255];
+          }
+        }
+      });
+      y = doc.lastAutoTable.finalY + 12;
+
+      // Month-wise breakdown
+      const allMonths = {};
+      data.companies.forEach(c => {
+        const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+        const months = buildCompanyMonthSummary(rec);
+        Object.keys(months).forEach(m => {
+          if (!allMonths[m]) allMonths[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
+          allMonths[m].weight += months[m].weight;
+          allMonths[m].base += months[m].base;
+          allMonths[m].gst += months[m].gst;
+          allMonths[m].grand += months[m].grand;
+          allMonths[m].advance += months[m].advance;
+          allMonths[m].payment += months[m].payment;
+        });
+      });
+
+      const monthKeys = Object.keys(allMonths).sort();
+      if (monthKeys.length) {
+        if (y > 220) { doc.addPage(); y = 20; }
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(124, 58, 237);
+        doc.text('Month-wise Breakdown (All Companies)', 14, y);
+        y += 3;
+
+        const monthBody = monthKeys.map(m => {
+          const x = allMonths[m];
+          return [
+            formatMonth(m),
+            x.weight.toFixed(2) + ' kg',
+            '₹' + x.grand.toFixed(2),
+            '₹' + x.advance.toFixed(2),
+            '₹' + x.payment.toFixed(2),
+            '₹' + (x.grand - x.advance - x.payment).toFixed(2)
+          ];
+        });
+
+        doc.autoTable({
+          startY: y,
+          head: [['Month', 'Work', 'Grand Total', 'Advance', 'Payment', 'Balance']],
+          body: monthBody,
+          theme: 'striped',
+          headStyles: { fillColor: [124, 58, 237], fontSize: 9 },
+          bodyStyles: { fontSize: 9 },
+          margin: { left: 14, right: 14 }
+        });
+        y = doc.lastAutoTable.finalY + 12;
+      }
+
+      // Top Companies
+      if (y > 220) { doc.addPage(); y = 20; }
+      const sorted = [...companyStats].sort((a, b) => b.tgr - a.tgr);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(234, 88, 12);
+      doc.text('Top Companies by Income', 14, y);
+      y += 3;
+
+      const topBody = sorted.map((s, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
+        return [
+          medal,
+          s.company.name,
+          s.tw.toFixed(2) + ' kg',
+          '₹' + s.tgr.toFixed(2),
+          '₹' + s.balance.toFixed(2)
+        ];
+      });
+
+      doc.autoTable({
+        startY: y,
+        head: [['Rank', 'Company', 'Work', 'Grand Total', 'Balance']],
+        body: topBody,
+        theme: 'striped',
+        headStyles: { fillColor: [234, 88, 12], fontSize: 9 },
+        bodyStyles: { fontSize: 9 },
+        margin: { left: 14, right: 14 }
+      });
+
+      // Footer
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(
+          'Generated by Fabrication Work Manager | ' + new Date().toLocaleString() + ' | Page ' + i + ' of ' + pageCount,
+          105, 290, { align: 'center' }
+        );
+      }
+
+      const now = new Date();
+      const dateStr = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0');
+      doc.save(`TotalBusinessOverview_${dateStr}.pdf`);
+      showToast('📄 Total Overview PDF downloaded!', 'pdf');
+    } catch (err) {
+      console.error(err);
+      alert('❌ PDF error: ' + err.message);
+    }
+  }
+
+  // ===== 🎯 TOTAL OVERVIEW WHATSAPP =====
+  function shareTotalOverviewWhatsApp() {
+    if (!data.companies.length) { alert('No companies!'); return; }
+
+    let oWork = 0, oGrand = 0, oAdvance = 0, oPayment = 0;
+    let msg = `🎯 *TOTAL BUSINESS OVERVIEW*\n━━━━━━━━━━━━━━━━━━\n`;
+    msg += `🏢 Total Companies: ${data.companies.length}\n\n`;
+
+    const sorted = [];
+    data.companies.forEach(c => {
+      const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+      const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+      const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+      const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+      const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+      oWork += tw; oGrand += tgr; oAdvance += ta; oPayment += tp;
+      sorted.push({ name: c.name, isActive: c.id === data.activeCompanyId, tw, tgr, ta, tp, balance: tgr - ta - tp });
+    });
+
+    // Company-wise
+    msg += `📊 *COMPANY-WISE SUMMARY*\n`;
+    sorted.forEach(s => {
+      msg += `\n📌 *${s.name}*${s.isActive ? ' ✅' : ''}\n`;
+      msg += `   Work: ${s.tw.toFixed(2)} kg\n`;
+      msg += `   Total: ${fmt(s.tgr)}\n`;
+      msg += `   Balance: *${fmt(s.balance)}*\n`;
+    });
+
+    // Overall
+    msg += `\n━━━━━━━━━━━━━━━━━━\n`;
+    msg += `✅ *OVERALL TOTALS*\n`;
+    msg += `⚖️ Total Work: ${oWork.toFixed(2)} kg\n`;
+    msg += `✅ Grand Total: ${fmt(oGrand)}\n`;
+    msg += `💰 Total Advance: ${fmt(oAdvance)}\n`;
+    msg += `💵 Total Payment: ${fmt(oPayment)}\n`;
+    msg += `📥 Total Received: ${fmt(oAdvance + oPayment)}\n`;
+    msg += `⚠️ *Total Balance: ${fmt(oGrand - oAdvance - oPayment)}*\n`;
+    msg += `\n📅 ${new Date().toLocaleString()}`;
+
+    openWhatsAppModal(msg);
+  }
+
+  // ===== FOLDER CONNECTION =====
+  async function connectFolder() {
+    if (!window.showDirectoryPicker) {
+      alert('❌ Folder feature only in Chrome/Edge.');
+      return;
+    }
+    try {
+      folderHandle = await window.showDirectoryPicker({ mode: 'readwrite', startIn: 'documents' });
       const permission = await folderHandle.requestPermission({ mode: 'readwrite' });
       if (permission !== 'granted') {
-        alert('❌ Permission denied. Folder me save nahi ho payega.');
+        alert('❌ Permission denied.');
         folderHandle = null;
         return;
       }
-
-      // Save handle to IndexedDB for next time
       await saveFolderHandle(folderHandle);
-
       updateFolderUI(true);
-      showToast('📁 Folder connected! Excel auto-save hoga yahan.', 'success');
-
-      // Immediately save Excel once
+      showToast('📁 Folder connected!', 'success');
       await autoSaveExcelToFolder();
     } catch (err) {
       if (err.name !== 'AbortError') {
         console.error(err);
-        alert('❌ Folder connect nahi hua: ' + err.message);
+        alert('❌ ' + err.message);
       }
     }
   }
 
   async function disconnectFolder() {
-    if (!confirm('Folder disconnect karein? Excel auto-save band ho jayega.')) return;
+    if (!confirm('Folder disconnect karein?')) return;
     folderHandle = null;
     await deleteFolderHandle();
     updateFolderUI(false);
@@ -744,15 +1254,12 @@
     }
   }
 
-  // IndexedDB helpers to store folder handle
   function openFolderDB() {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open('fab_folder_db', 1);
       req.onupgradeneeded = (e) => {
         const db = e.target.result;
-        if (!db.objectStoreNames.contains('handles')) {
-          db.createObjectStore('handles');
-        }
+        if (!db.objectStoreNames.contains('handles')) db.createObjectStore('handles');
       };
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
@@ -765,7 +1272,7 @@
       const tx = db.transaction('handles', 'readwrite');
       tx.objectStore('handles').put(handle, FOLDER_DB);
       return new Promise((res) => { tx.oncomplete = res; });
-    } catch (e) { console.warn('Cannot save folder handle:', e); }
+    } catch (e) { console.warn(e); }
   }
 
   async function loadFolderHandle() {
@@ -793,59 +1300,43 @@
     if (!handle) return;
     try {
       const permission = await handle.queryPermission({ mode: 'readwrite' });
-      if (permission === 'granted') {
+      if (permission === 'granted' || permission === 'prompt') {
         folderHandle = handle;
-        updateFolderUI(true);
-      } else if (permission === 'prompt') {
-        folderHandle = handle;
-        // Show as connected but will need permission on save
         updateFolderUI(true);
       }
-    } catch (e) { console.warn('Restore folder error:', e); }
+    } catch (e) { console.warn(e); }
   }
 
-  // ===== AUTO-SAVE EXCEL TO FOLDER =====
   async function autoSaveExcelToFolder(silent = false) {
     if (!folderHandle) {
       if (!silent) alert('📁 Pehle folder connect karo!');
       return;
     }
-
     try {
-      // Verify permission
       let permission = await folderHandle.queryPermission({ mode: 'readwrite' });
       if (permission !== 'granted') {
         permission = await folderHandle.requestPermission({ mode: 'readwrite' });
         if (permission !== 'granted') {
-          if (!silent) alert('❌ Folder permission nahi mili');
+          if (!silent) alert('❌ Permission nahi mili');
           return;
         }
       }
-
-      // Generate Excel file
       const wb = generateExcelWorkbook();
       const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-      // Filename
       const now = new Date();
       const dateStr = now.getFullYear() + '-' +
         String(now.getMonth() + 1).padStart(2, '0') + '-' +
         String(now.getDate()).padStart(2, '0');
       const filename = `FabricationReport_${dateStr}.xlsx`;
-
-      // Save to folder (overwrite same-day file)
       const fileHandle = await folderHandle.getFileHandle(filename, { create: true });
       const writable = await fileHandle.createWritable();
       await writable.write(blob);
       await writable.close();
-
-      if (!silent) {
-        showToast('💾 Excel saved to folder: ' + filename, 'excel');
-      }
+      if (!silent) showToast('💾 Excel saved: ' + filename, 'excel');
     } catch (err) {
-      console.error('Auto-save Excel failed:', err);
-      if (!silent) alert('❌ Excel save nahi hua: ' + err.message);
+      console.error(err);
+      if (!silent) alert('❌ ' + err.message);
     }
   }
 
@@ -854,21 +1345,21 @@
     const wb = XLSX.utils.book_new();
     const usedNames = new Set(['Overall Summary', 'Company Comparison', 'Month-wise Summary']);
 
-    // Overall Summary
+    // 🎯 NEW: Total Overview sheet (first sheet)
+    const wsTotal = buildTotalOverviewSheet();
+    XLSX.utils.book_append_sheet(wb, wsTotal, '🎯 Total Overview');
+
     const wsOverall = buildOverallSheet();
     XLSX.utils.book_append_sheet(wb, wsOverall, 'Overall Summary');
 
-    // Company Comparison
     if (data.companies.length > 1) {
       const wsComp = buildComparisonSheet();
       XLSX.utils.book_append_sheet(wb, wsComp, 'Company Comparison');
     }
 
-    // Month-wise Summary
     const wsMonthly = buildMonthlySheet();
     XLSX.utils.book_append_sheet(wb, wsMonthly, 'Month-wise Summary');
 
-    // Each company sheet
     data.companies.forEach(c => {
       let sheetName = safeSheetName(c.name);
       let counter = 1;
@@ -884,7 +1375,88 @@
     return wb;
   }
 
-  // ===== EXCEL EXPORT (Download) =====
+  // 🎯 NEW: Total Overview Excel sheet
+  function buildTotalOverviewSheet() {
+    const ws_data = [];
+    ws_data.push(['🎯 TOTAL BUSINESS OVERVIEW - ALL COMPANIES']);
+    ws_data.push(['Report Generated', new Date().toLocaleString()]);
+    ws_data.push(['Total Companies', data.companies.length]);
+    ws_data.push([]);
+
+    // Overall totals
+    let oWork = 0, oBase = 0, oGst = 0, oGrand = 0, oAdvance = 0, oPayment = 0;
+    const companyStats = data.companies.map(c => {
+      const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+      const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+      const tb = rec.work.reduce((s, w) => s + (w.base !== undefined ? w.base : w.amount), 0);
+      const tg = rec.work.reduce((s, w) => s + (w.gst !== undefined ? w.gst : 0), 0);
+      const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+      const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+      const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+      oWork += tw; oBase += tb; oGst += tg; oGrand += tgr; oAdvance += ta; oPayment += tp;
+      return { company: c, tw, tb, tg, tgr, ta, tp, balance: tgr - ta - tp };
+    });
+
+    ws_data.push(['=== OVERALL TOTALS ===']);
+    ws_data.push(['Total Companies', data.companies.length]);
+    ws_data.push(['Total Work (kg)', oWork]);
+    ws_data.push(['Base Amount (₹)', oBase]);
+    ws_data.push(['Total GST (₹)', oGst]);
+    ws_data.push(['Grand Total Income (₹)', oGrand]);
+    ws_data.push(['Total Advance (₹)', oAdvance]);
+    ws_data.push(['Total Payment (₹)', oPayment]);
+    ws_data.push(['Total Received (₹)', oAdvance + oPayment]);
+    ws_data.push(['Total Balance Due (₹)', oGrand - oAdvance - oPayment]);
+    ws_data.push([]);
+
+    // Company breakdown
+    ws_data.push(['=== COMPANY-WISE BREAKDOWN ===']);
+    ws_data.push(['Company', 'Work (kg)', 'Base (₹)', 'GST (₹)', 'Grand Total (₹)', 'Advance (₹)', 'Payment (₹)', 'Received (₹)', 'Balance (₹)']);
+    companyStats.forEach(s => {
+      ws_data.push([
+        s.company.name, s.tw, s.tb, s.tg, s.tgr, s.ta, s.tp, s.ta + s.tp, s.balance
+      ]);
+    });
+    ws_data.push(['TOTAL', oWork, oBase, oGst, oGrand, oAdvance, oPayment, oAdvance + oPayment, oGrand - oAdvance - oPayment]);
+    ws_data.push([]);
+
+    // Month-wise
+    const allMonths = {};
+    data.companies.forEach(c => {
+      const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+      const months = buildCompanyMonthSummary(rec);
+      Object.keys(months).forEach(m => {
+        if (!allMonths[m]) allMonths[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
+        allMonths[m].weight += months[m].weight;
+        allMonths[m].base += months[m].base;
+        allMonths[m].gst += months[m].gst;
+        allMonths[m].grand += months[m].grand;
+        allMonths[m].advance += months[m].advance;
+        allMonths[m].payment += months[m].payment;
+      });
+    });
+
+    ws_data.push(['=== MONTH-WISE BREAKDOWN (ALL COMPANIES) ===']);
+    ws_data.push(['Month', 'Work (kg)', 'Base (₹)', 'GST (₹)', 'Grand Total (₹)', 'Advance (₹)', 'Payment (₹)', 'Balance (₹)']);
+    const monthKeys = Object.keys(allMonths).sort();
+    monthKeys.forEach(m => {
+      const x = allMonths[m];
+      ws_data.push([monthName(m), x.weight, x.base, x.gst, x.grand, x.advance, x.payment, x.grand - x.advance - x.payment]);
+    });
+    ws_data.push([]);
+
+    // Top companies
+    ws_data.push(['=== TOP COMPANIES BY INCOME ===']);
+    ws_data.push(['Rank', 'Company', 'Work (kg)', 'Grand Total (₹)', 'Balance (₹)']);
+    const sorted = [...companyStats].sort((a, b) => b.tgr - a.tgr);
+    sorted.forEach((s, i) => {
+      ws_data.push(['#' + (i + 1), s.company.name, s.tw, s.tgr, s.balance]);
+    });
+
+    return XLSX.utils.aoa_to_sheet(ws_data);
+  }
+
+  // ===== EXCEL HELPERS =====
   function selectExcelOption(el) {
     document.querySelectorAll('.excel-option').forEach(opt => opt.classList.remove('selected'));
     el.classList.add('selected');
@@ -1064,7 +1636,7 @@
   }
 
   function downloadExcel() {
-    if (!data.companies.length) { alert('❌ Koi company nahi hai!'); return; }
+    if (!data.companies.length) { alert('❌ No companies!'); return; }
     const selected = document.querySelector('input[name="excelOption"]:checked')?.value || 'all';
     const wb = XLSX.utils.book_new();
     const now = new Date();
@@ -1092,18 +1664,16 @@
       showToast('📊 Excel downloaded!', 'excel');
     } catch (err) {
       console.error(err);
-      alert('❌ Excel export failed: ' + err.message);
+      alert('❌ Excel error: ' + err.message);
     }
   }
 
-  // ===== PDF GENERATION =====
+  // ===== PDF GENERATION (COMPANY) =====
   function generatePDFForCompany(company) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'mm', 'a4');
-
     const rec = data.records[company.id] || { work: [], advance: [], payment: [] };
 
-    // Header
     doc.setFillColor(26, 77, 143);
     doc.rect(0, 0, 210, 25, 'F');
     doc.setTextColor(255, 255, 255);
@@ -1117,7 +1687,6 @@
     doc.setTextColor(0, 0, 0);
     let y = 33;
 
-    // Company details box
     doc.setFillColor(240, 249, 255);
     doc.rect(14, y - 5, 182, 30, 'F');
     doc.setFontSize(10);
@@ -1130,55 +1699,36 @@
     if (company.phone) { doc.text('Phone: ' + company.phone, 18, y); y += 5; }
     if (company.gst) { doc.text('GST: ' + company.gst, 18, y); y += 5; }
     doc.text('Report Date: ' + new Date().toLocaleString(), 18, y);
-
     y += 12;
 
-    // Work Records
     if (rec.work.length) {
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(26, 77, 143);
       doc.text('Work Records', 14, y);
       y += 3;
-
       const workBody = rec.work.map(w => {
         const base = w.base !== undefined ? w.base : w.amount;
         const gst = w.gst !== undefined ? w.gst : 0;
         const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
-        return [
-          w.date, w.name, w.weight + ' kg', '₹' + w.rate,
-          '₹' + base.toFixed(2),
-          gstPct + '%',
-          '₹' + gst.toFixed(2),
-          '₹' + w.amount.toFixed(2)
-        ];
+        return [w.date, w.name, w.weight + ' kg', '₹' + w.rate, '₹' + base.toFixed(2), gstPct + '%', '₹' + gst.toFixed(2), '₹' + w.amount.toFixed(2)];
       });
-
       const tw = rec.work.reduce((s, w) => s + w.weight, 0);
       const tb = rec.work.reduce((s, w) => s + (w.base !== undefined ? w.base : w.amount), 0);
       const tg = rec.work.reduce((s, w) => s + (w.gst !== undefined ? w.gst : 0), 0);
       const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
-
       workBody.push(['TOTAL', '', tw + ' kg', '', '₹' + tb.toFixed(2), '', '₹' + tg.toFixed(2), '₹' + tgr.toFixed(2)]);
-
       doc.autoTable({
         startY: y,
         head: [['Date', 'Work', 'Weight', 'Rate', 'Base', 'GST%', 'GST Amt', 'Total']],
-        body: workBody,
-        theme: 'striped',
+        body: workBody, theme: 'striped',
         headStyles: { fillColor: [26, 77, 143], fontSize: 8 },
         bodyStyles: { fontSize: 8 },
-        columnStyles: {
-          0: { cellWidth: 20 }, 1: { cellWidth: 30 }, 2: { cellWidth: 18 },
-          3: { cellWidth: 15 }, 4: { cellWidth: 22 }, 5: { cellWidth: 12 },
-          6: { cellWidth: 22 }, 7: { cellWidth: 24 }
-        },
         margin: { left: 14, right: 14 }
       });
       y = doc.lastAutoTable.finalY + 10;
     }
 
-    // Advance Records
     if (rec.advance.length) {
       if (y > 240) { doc.addPage(); y = 20; }
       doc.setFontSize(12);
@@ -1186,16 +1736,12 @@
       doc.setTextColor(234, 88, 12);
       doc.text('Advance Records', 14, y);
       y += 3;
-
       const advBody = rec.advance.map(a => [a.date, '₹' + a.amount.toFixed(2), a.note || '-']);
       const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
       advBody.push(['TOTAL ADVANCE', '₹' + ta.toFixed(2), '']);
-
       doc.autoTable({
         startY: y,
-        head: [['Date', 'Amount', 'Note']],
-        body: advBody,
-        theme: 'striped',
+        head: [['Date', 'Amount', 'Note']], body: advBody, theme: 'striped',
         headStyles: { fillColor: [234, 88, 12], fontSize: 9 },
         bodyStyles: { fontSize: 9 },
         margin: { left: 14, right: 14 }
@@ -1203,7 +1749,6 @@
       y = doc.lastAutoTable.finalY + 10;
     }
 
-    // Payment Records
     if (rec.payment.length) {
       if (y > 240) { doc.addPage(); y = 20; }
       doc.setFontSize(12);
@@ -1211,16 +1756,12 @@
       doc.setTextColor(8, 145, 178);
       doc.text('Payment Records', 14, y);
       y += 3;
-
       const payBody = rec.payment.map(p => [p.date, '₹' + p.amount.toFixed(2), p.note || '-']);
       const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
       payBody.push(['TOTAL PAYMENT', '₹' + tp.toFixed(2), '']);
-
       doc.autoTable({
         startY: y,
-        head: [['Date', 'Amount', 'Note']],
-        body: payBody,
-        theme: 'striped',
+        head: [['Date', 'Amount', 'Note']], body: payBody, theme: 'striped',
         headStyles: { fillColor: [8, 145, 178], fontSize: 9 },
         bodyStyles: { fontSize: 9 },
         margin: { left: 14, right: 14 }
@@ -1228,7 +1769,6 @@
       y = doc.lastAutoTable.finalY + 10;
     }
 
-    // Final Summary
     if (y > 200) { doc.addPage(); y = 20; }
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
@@ -1256,15 +1796,12 @@
         ['Balance Due', '₹' + (tgr - ta - tp).toFixed(2)]
       ],
       theme: 'grid',
-      headStyles: { fillColor: [22, 163, 74] },
       bodyStyles: { fontSize: 10 },
       columnStyles: { 0: { fontStyle: 'bold', cellWidth: 70 } },
       margin: { left: 14, right: 14 }
     });
-
     y = doc.lastAutoTable.finalY + 10;
 
-    // Month-wise Summary
     const months = buildCompanyMonthSummary(rec);
     const keys = Object.keys(months).sort();
     if (keys.length) {
@@ -1274,52 +1811,35 @@
       doc.setTextColor(124, 58, 237);
       doc.text('Month-wise Summary', 14, y);
       y += 3;
-
       const monthBody = keys.map(m => {
         const x = months[m];
-        return [
-          monthName(m),
-          x.weight.toFixed(2) + ' kg',
-          '₹' + x.base.toFixed(2),
-          '₹' + x.gst.toFixed(2),
-          '₹' + x.grand.toFixed(2),
-          '₹' + x.advance.toFixed(2),
-          '₹' + x.payment.toFixed(2),
-          '₹' + (x.grand - x.advance - x.payment).toFixed(2)
-        ];
+        return [monthName(m), x.weight.toFixed(2) + ' kg', '₹' + x.base.toFixed(2), '₹' + x.gst.toFixed(2), '₹' + x.grand.toFixed(2), '₹' + x.advance.toFixed(2), '₹' + x.payment.toFixed(2), '₹' + (x.grand - x.advance - x.payment).toFixed(2)];
       });
-
       doc.autoTable({
         startY: y,
         head: [['Month', 'Work', 'Base', 'GST', 'Total', 'Advance', 'Payment', 'Balance']],
-        body: monthBody,
-        theme: 'striped',
+        body: monthBody, theme: 'striped',
         headStyles: { fillColor: [124, 58, 237], fontSize: 8 },
         bodyStyles: { fontSize: 8 },
         margin: { left: 14, right: 14 }
       });
-      y = doc.lastAutoTable.finalY + 10;
     }
 
-    // Footer
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.setTextColor(150, 150, 150);
-      doc.text(
-        'Generated by Fabrication Work Manager | Page ' + i + ' of ' + pageCount,
-        105, 290, { align: 'center' }
-      );
+      doc.text('Generated by Fabrication Work Manager | Page ' + i + ' of ' + pageCount, 105, 290, { align: 'center' });
     }
-
     return doc;
   }
 
   function downloadPDF() {
     const c = getActiveCompany();
     if (!c) { alert('❌ Pehle company select karo!'); return; }
-    if (!data.records[c.id]?.work?.length && !data.records[c.id]?.advance?.length && !data.records[c.id]?.payment?.length) {
+    const rec = data.records[c.id];
+    if (!rec || (!rec.work.length && !rec.advance.length && !rec.payment.length)) {
       alert('❌ Is company ka koi record nahi hai!');
       return;
     }
@@ -1329,77 +1849,46 @@
       const dateStr = now.getFullYear() + '-' +
         String(now.getMonth() + 1).padStart(2, '0') + '-' +
         String(now.getDate()).padStart(2, '0');
-      const filename = `${c.name.replace(/\s+/g, '_')}_Report_${dateStr}.pdf`;
-      doc.save(filename);
-      showToast('📄 PDF downloaded: ' + filename, 'pdf');
+      doc.save(`${c.name.replace(/\s+/g, '_')}_Report_${dateStr}.pdf`);
+      showToast('📄 PDF downloaded!', 'pdf');
     } catch (err) {
       console.error(err);
-      alert('❌ PDF generation failed: ' + err.message);
+      alert('❌ ' + err.message);
     }
   }
 
   function downloadAllPDF() {
     if (!data.companies.length) { alert('No companies!'); return; }
-    try {
-      const { jsPDF } = window.jspdf;
-      const masterDoc = new jsPDF('p', 'mm', 'a4');
-      let isFirst = true;
-
-      data.companies.forEach(c => {
-        const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
-        if (!rec.work.length && !rec.advance.length && !rec.payment.length) return;
-
-        const companyDoc = generatePDFForCompany(c);
-        const pages = companyDoc.internal.getNumberOfPages();
-
-        for (let p = 1; p <= pages; p++) {
-          if (!isFirst) masterDoc.addPage();
-          isFirst = false;
-          masterDoc.setPage(masterDoc.internal.getNumberOfPages());
-          // Simpler: use addPage + setPage logic
-          companyDoc.setPage(p);
-          // Copy via output
-          // Actually easier: regenerate with shared doc
-        }
-      });
-
-      // Fallback: download one by one
-      let delay = 0;
-      data.companies.forEach((c, idx) => {
-        const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
-        if (!rec.work.length && !rec.advance.length && !rec.payment.length) return;
-        setTimeout(() => {
+    let delay = 0;
+    data.companies.forEach(c => {
+      const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+      if (!rec.work.length && !rec.advance.length && !rec.payment.length) return;
+      setTimeout(() => {
+        try {
           const doc = generatePDFForCompany(c);
           const dateStr = new Date().toISOString().split('T')[0];
           doc.save(`${c.name.replace(/\s+/g, '_')}_Report_${dateStr}.pdf`);
-        }, delay);
-        delay += 500;
-      });
-      showToast('📚 All PDFs downloading...', 'pdf');
-    } catch (err) {
-      alert('❌ ' + err.message);
-    }
+        } catch (e) { console.error(e); }
+      }, delay);
+      delay += 500;
+    });
+    showToast('📚 All PDFs downloading...', 'pdf');
   }
 
   // ===== WHATSAPP + PDF =====
   function shareViaWhatsAppWithPDF() {
     const c = getActiveCompany();
     if (!c) { alert('❌ Pehle company select karo!'); return; }
-
     const rec = getActiveRecords();
     if (!rec.work.length && !rec.advance.length && !rec.payment.length) {
       alert('❌ Is company ka koi record nahi hai!');
       return;
     }
-
-    // 1. Generate + Download PDF
     try {
       const doc = generatePDFForCompany(c);
       const dateStr = new Date().toISOString().split('T')[0];
-      const filename = `${c.name.replace(/\s+/g, '_')}_Report_${dateStr}.pdf`;
-      doc.save(filename);
+      doc.save(`${c.name.replace(/\s+/g, '_')}_Report_${dateStr}.pdf`);
 
-      // 2. Prepare WhatsApp message
       const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
       const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
       const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
@@ -1423,10 +1912,10 @@
       document.getElementById('waPhone').value = '';
       document.getElementById('pdfAttachNotice').style.display = 'block';
       document.getElementById('waModal').classList.add('show');
-      showToast('📄 PDF downloaded! WhatsApp me attach karo.', 'pdf');
+      showToast('📄 PDF downloaded!', 'pdf');
     } catch (err) {
       console.error(err);
-      alert('❌ PDF error: ' + err.message);
+      alert('❌ ' + err.message);
     }
   }
 
@@ -1435,7 +1924,7 @@
     autoSave(false);
     const exportData = {
       app: 'FabricationWorkManager',
-      version: 7,
+      version: 8,
       format: 'multi-company-single-file',
       exportedAt: new Date().toISOString(),
       data: data
@@ -1452,7 +1941,7 @@
       String(now.getMinutes()).padStart(2, '0');
     link.download = `FabricationData_${data.companies.length}Companies_${ts}${FILE_EXTENSION}.json`;
     link.click();
-    showToast('📤 Data file exported!', 'info');
+    showToast('📤 Backup exported!', 'info');
   }
 
   function importSingleFile(e) {
@@ -1465,7 +1954,7 @@
         const restored = parsed.data || parsed;
         if (!restored.companies || !restored.records) {
           if (restored.work && restored.advance && restored.payment) {
-            if (!confirm('Old backup detected. Import as new company?')) return;
+            if (!confirm('Old backup. Import as new company?')) return;
             const cid = Date.now();
             const cname = (restored.company && restored.company.name) || 'Imported Company';
             data.companies.push({ id: cid, name: cname, owner: restored.company?.owner || '', phone: restored.company?.phone || '', address: restored.company?.address || '', gst: restored.company?.gst || '', defaultGst: restored.company?.defaultGst || 18 });
@@ -1477,12 +1966,12 @@
           }
           throw new Error('Invalid file');
         }
-        if (!confirm(`Import file: ${file.name}\nCompanies: ${restored.companies.length}\n\nThis will REPLACE all current data. Continue?`)) { e.target.value = ''; return; }
+        if (!confirm(`Import: ${file.name}\nCompanies: ${restored.companies.length}\n\nReplace all current data?`)) { e.target.value = ''; return; }
         data = restored;
         autoSave(); renderAll();
-        showToast('📥 Data imported!', 'success');
+        showToast('📥 Imported!', 'success');
       } catch (err) {
-        alert('❌ Error: ' + err.message);
+        alert('❌ ' + err.message);
       }
       e.target.value = '';
     };
@@ -1527,11 +2016,7 @@
       document.getElementById('companyDefaultGst').value = c.defaultGst || '18';
     } else {
       title.textContent = '🏢 Add New Company';
-      document.getElementById('companyNameInput').value = '';
-      document.getElementById('companyOwnerInput').value = '';
-      document.getElementById('companyPhoneInput').value = '';
-      document.getElementById('companyAddressInput').value = '';
-      document.getElementById('companyGstInput').value = '';
+      ['companyNameInput','companyOwnerInput','companyPhoneInput','companyAddressInput','companyGstInput'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('companyDefaultGst').value = '18';
     }
     modal.classList.add('show');
@@ -1550,7 +2035,7 @@
 
   function saveCompanyDetails() {
     const name = document.getElementById('companyNameInput').value.trim();
-    if (!name) { alert('Company name is required!'); return; }
+    if (!name) { alert('Company name required!'); return; }
     const companyData = {
       name: name,
       owner: document.getElementById('companyOwnerInput').value.trim(),
@@ -1578,7 +2063,7 @@
   function deleteCompany(companyId) {
     const c = data.companies.find(x => x.id === companyId);
     if (!c) return;
-    if (!confirm(`Delete "${c.name}" and ALL its records?\n\nThis cannot be undone!`)) return;
+    if (!confirm(`Delete "${c.name}" and ALL records?`)) return;
     data.companies = data.companies.filter(x => x.id !== companyId);
     delete data.records[companyId];
     if (data.activeCompanyId === companyId) {
@@ -1710,7 +2195,7 @@
     msg += `📦 *WORK DETAILS*\n━━━━━━━━━━━━━━━━━━\n`;
     msg += `📅 ${w.date}\n🔧 ${w.name}\n⚖️ ${w.weight} kg × ₹${w.rate}\n💵 Base: ${fmt(base)}\n`;
     if (gstPct > 0) msg += `📊 GST ${gstPct}%: ${fmt(gst)}\n`;
-    msg += `━━━━━━━━━━━━━━━━━━\n✅ *TOTAL: ${fmt(w.amount)}*\n`;
+    msg += `━━━━━━━━━━━━━━━━━━\n✅ *TOTAL: ${fmt(w.amount)}*`;
     openWhatsAppModal(msg);
   }
 
@@ -1718,19 +2203,12 @@
     const rec = getActiveRecords();
     if (!rec.work.length) { alert('No records!'); return; }
     let msg = getCompanyHeader() + `📦 *WORK RECORDS*\n━━━━━━━━━━━━━━━━━━\n`;
-    let tw = 0, tb = 0, tg = 0, tgr = 0;
+    let tw = 0, tgr = 0;
     rec.work.forEach((w, i) => {
-      const base = w.base !== undefined ? w.base : w.amount;
-      const gst = w.gst !== undefined ? w.gst : 0;
-      const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
-      tw += w.weight; tb += base; tg += gst; tgr += w.amount;
-      msg += `\n${i + 1}. *${w.name}* (${w.date})\n   ${w.weight} kg × ₹${w.rate} = ${fmt(base)}\n`;
-      if (gstPct > 0) msg += `   GST ${gstPct}%: ${fmt(gst)}\n`;
-      msg += `   Total: *${fmt(w.amount)}*\n`;
+      tw += w.weight; tgr += w.amount;
+      msg += `\n${i + 1}. *${w.name}* (${w.date})\n   ${w.weight} kg × ₹${w.rate} = ${fmt(w.amount)}\n`;
     });
-    msg += `\n━━━━━━━━━━━━━━━━━━\n⚖️ Weight: ${tw.toFixed(2)} kg\n💵 Base: ${fmt(tb)}\n`;
-    if (tg > 0) msg += `📊 GST: ${fmt(tg)}\n`;
-    msg += `✅ *Total: ${fmt(tgr)}*`;
+    msg += `\n━━━━━━━━━━━━━━━━━━\n⚖️ Weight: ${tw.toFixed(2)} kg\n✅ *Total: ${fmt(tgr)}*`;
     openWhatsAppModal(msg);
   }
 
@@ -1781,9 +2259,7 @@
     keys.forEach(m => {
       const x = months[m];
       const dueM = x.grand - x.advance - x.payment;
-      msg += `\n📅 *${formatMonth(m)}*\n   Work: ${x.weight.toFixed(2)} kg\n   Base: ${fmt(x.base)}\n`;
-      if (x.gst > 0) msg += `   GST: ${fmt(x.gst)}\n`;
-      msg += `   Total: ${fmt(x.grand)}\n   Advance: ${fmt(x.advance)}\n   Payment: ${fmt(x.payment)}\n   Balance: *${fmt(dueM)}*\n`;
+      msg += `\n📅 *${formatMonth(m)}*\n   Work: ${x.weight.toFixed(2)} kg\n   Total: ${fmt(x.grand)}\n   Balance: *${fmt(dueM)}*\n`;
     });
     const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
     const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
@@ -1802,8 +2278,7 @@
       const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
       const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
       oGr += tgr; oA += ta; oP += tp;
-      msg += `\n📌 *${c.name}*${c.id === data.activeCompanyId ? ' ✅' : ''}\n`;
-      msg += `   Total: ${fmt(tgr)}\n   Balance: *${fmt(tgr - ta - tp)}*\n`;
+      msg += `\n📌 *${c.name}*${c.id === data.activeCompanyId ? ' ✅' : ''}\n   Total: ${fmt(tgr)}\n   Balance: *${fmt(tgr - ta - tp)}*\n`;
     });
     msg += `\n━━━━━━━━━━━━━━━━━━\n✅ Grand Total: ${fmt(oGr)}\n📥 Received: ${fmt(oA + oP)}\n⚠️ *Balance: ${fmt(oGr - oA - oP)}*`;
     openWhatsAppModal(msg);
@@ -1818,6 +2293,7 @@
     document.getElementById('tab-' + name).classList.add('active');
     if (ev && ev.target) ev.target.classList.add('active');
     if (name === 'allCompanies') renderAllCompaniesTable();
+    if (name === 'totalOverview') renderTotalOverview();
   }
 
   function fmt(n) { return '₹' + Number(n).toLocaleString('en-IN', {maximumFractionDigits:2, minimumFractionDigits:2}); }
@@ -1840,10 +2316,7 @@
     const gstType = document.getElementById('workGstType').value;
     if (!date || !name || !weight || !rate) { alert('Please fill all fields!'); return; }
     const calc = calculateGst(weight, rate, gstPercent, gstType);
-    getActiveRecords().work.push({
-      id: Date.now(), date, name, weight, rate, gstPercent, gstType,
-      base: calc.base, gst: calc.gst, amount: calc.total
-    });
+    getActiveRecords().work.push({ id: Date.now(), date, name, weight, rate, gstPercent, gstType, base: calc.base, gst: calc.gst, amount: calc.total });
     autoSave(); renderAll();
     document.getElementById('workName').value = '';
     document.getElementById('workWeight').value = '';
@@ -1935,6 +2408,7 @@
     renderSummary();
     applyDefaultGst();
     renderAllCompaniesTable();
+    renderTotalOverview();
     updateAutoSaveStatus();
   }
 

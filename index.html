@@ -52,6 +52,7 @@
   .btn-gray { background: #6b7280; } .btn-gray:hover { background: #4b5563; }
   .btn-whatsapp { background: #25D366; } .btn-whatsapp:hover { background: #1da851; }
   .btn-whatsapp-dark { background: #128C7E; } .btn-whatsapp-dark:hover { background: #0d6b60; }
+  .btn-excel { background: #217346; } .btn-excel:hover { background: #185c37; }
 
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px; }
   .stat-box { background: #fff; border-radius: 10px; padding: 14px 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #1a4d8f; }
@@ -101,7 +102,6 @@
   .action-btns { display: flex; gap: 5px; flex-wrap: wrap; }
   .action-btns button { padding: 5px 9px; font-size: 11px; margin: 0; }
 
-  /* Total summary boxes in tabs */
   .tab-total-box { margin-top:12px; padding:14px 16px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
   .tab-total-box .tt-label { font-size:13px; font-weight:700; }
   .tab-total-box .tt-value { font-size:22px; font-weight:700; }
@@ -143,9 +143,21 @@
   .toast.info { background: #2563eb; }
   .toast.warn { background: #ea580c; }
   .toast.wa { background: #25D366; }
+  .toast.excel { background: #217346; }
 
   .save-flash { animation: flash 0.5s; }
   @keyframes flash { 0% { background-color: #dcfce7; } 100% { background-color: transparent; } }
+
+  /* Excel Modal */
+  .excel-options { display: grid; gap: 12px; margin: 15px 0; }
+  .excel-option { border: 2px solid #e2e8f0; border-radius: 8px; padding: 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+  .excel-option:hover { border-color: #217346; background: #f0fdf4; }
+  .excel-option.selected { border-color: #217346; background: #dcfce7; }
+  .excel-option .eo-icon { font-size: 28px; }
+  .excel-option .eo-info { flex: 1; }
+  .excel-option .eo-title { font-weight: 700; color: #1a4d8f; font-size: 14px; margin-bottom: 3px; }
+  .excel-option .eo-desc { font-size: 11px; color: #666; }
+  .excel-option input { width: auto; margin-right: 6px; }
 
   @media (max-width: 600px) {
     h1 { font-size: 19px; }
@@ -177,6 +189,7 @@
     </div>
     <div class="autosave-actions">
       <button class="btn-green" onclick="manualSave()">💾 Save Now</button>
+      <button class="btn-excel" onclick="openExcelModal()">📊 Download Excel</button>
       <button class="btn-blue" onclick="exportSingleFile()">📤 Export Data File</button>
       <button class="btn-orange" onclick="document.getElementById('importFile').click()">📥 Import Data File</button>
       <input type="file" id="importFile" accept=".json,.fab" style="display:none" onchange="importSingleFile(event)">
@@ -204,7 +217,7 @@
     </div>
   </div>
 
-  <!-- Dashboard Stats - SEPARATE ADVANCE & PAYMENT -->
+  <!-- Dashboard Stats -->
   <div class="stats">
     <div class="stat-box"><div class="label">⚖️ Total Work</div><div class="value" id="statWork">0</div><div class="sub">kg</div></div>
     <div class="stat-box green"><div class="label">💵 Base Earnings</div><div class="value" id="statEarning">₹0</div></div>
@@ -223,6 +236,7 @@
     <button class="tab-btn" onclick="showTab('payment', event)">💵 Payments</button>
     <button class="tab-btn" onclick="showTab('summary', event)">📊 Summary</button>
     <button class="tab-btn" onclick="showTab('allCompanies', event)">🏢 All Companies</button>
+    <button class="tab-btn" onclick="showTab('excel', event)">📊 Excel Export</button>
   </div>
 
   <!-- WORK TAB -->
@@ -397,6 +411,58 @@
       <button class="btn-whatsapp" onclick="shareAllCompaniesWhatsApp()" style="margin-top:12px;">📱 Share All Companies Summary</button>
     </div>
   </div>
+
+  <!-- EXCEL EXPORT TAB -->
+  <div id="tab-excel" class="tab-content">
+    <div class="card">
+      <h2>📊 Download Excel Report</h2>
+      <p style="font-size:13px; color:#666; margin-bottom:15px;">
+        Excel file download karo jisme <b>har company ki alag sheet</b> hogi aur <b>month-wise summary</b> bhi hogi.
+      </p>
+      <div class="excel-options">
+        <label class="excel-option" onclick="selectExcelOption(this)">
+          <input type="radio" name="excelOption" value="all" checked>
+          <div class="eo-icon">📚</div>
+          <div class="eo-info">
+            <div class="eo-title">Full Excel Report (Recommended)</div>
+            <div class="eo-desc">Ek Excel file — har company ki alag sheet + overall summary + month-wise data</div>
+          </div>
+        </label>
+        <label class="excel-option" onclick="selectExcelOption(this)">
+          <input type="radio" name="excelOption" value="active">
+          <div class="eo-icon">🏢</div>
+          <div class="eo-info">
+            <div class="eo-title">Only Current Company</div>
+            <div class="eo-desc">Sirf active company ka Excel file (work + advance + payment + month-wise)</div>
+          </div>
+        </label>
+        <label class="excel-option" onclick="selectExcelOption(this)">
+          <input type="radio" name="excelOption" value="monthly">
+          <div class="eo-icon">📅</div>
+          <div class="eo-info">
+            <div class="eo-title">Month-wise Summary (All Companies)</div>
+            <div class="eo-desc">Har company ka month-wise breakdown — ek hi sheet me</div>
+          </div>
+        </label>
+      </div>
+      <button class="btn-excel" onclick="downloadExcel()" style="font-size:15px; padding:12px 24px; margin-top:10px;">
+        📥 Download Excel File (.xlsx)
+      </button>
+      <div class="hint" style="margin-top:12px;">
+        💡 Excel file me har company ki alag sheet hogi — jaise "Sharma_Fabrication", "Gupta_Steel_Works" etc.
+      </div>
+    </div>
+    <div class="card">
+      <h2>📋 Excel File Structure</h2>
+      <div style="font-size:13px; color:#555; line-height:1.8;">
+        <p><b>📚 Full Excel Report me ye sheets hongi:</b></p>
+        <p>1. <b>Overall Summary</b> — Saari companies ka total ek jagah</p>
+        <p>2. <b>Company-wise sheets</b> — Har company ka apna sheet (work + advance + payment)</p>
+        <p>3. <b>Month-wise Summary</b> — Mahine ke hisab se saara data</p>
+        <p>4. <b>Company Comparison</b> — Sabhi companies ki comparison</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- COMPANY ADD/EDIT MODAL -->
@@ -461,6 +527,9 @@
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- SheetJS Library for Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
   const STORAGE_KEY = 'fab_multicompany_autosave';
@@ -548,6 +617,297 @@
     if (data.lastAutoSave) {
       const d = new Date(data.lastAutoSave);
       time.textContent = 'Last saved: ' + d.toLocaleString();
+    }
+  }
+
+  // ===== EXCEL EXPORT FUNCTIONS =====
+  function openExcelModal() {
+    showTab('excel', { target: document.querySelectorAll('.tab-btn')[5] });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function selectExcelOption(el) {
+    document.querySelectorAll('.excel-option').forEach(opt => opt.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  // Helper: Get month name from YYYY-MM
+  function monthName(ym) {
+    const [y, m] = ym.split('-');
+    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return names[parseInt(m) - 1] + '-' + y;
+  }
+
+  // Helper: Build month-wise data for a company
+  function buildCompanyMonthSummary(records) {
+    const months = {};
+    records.work.forEach(w => {
+      const m = w.date.substring(0, 7);
+      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
+      months[m].weight += w.weight;
+      months[m].base += (w.base !== undefined ? w.base : w.amount);
+      months[m].gst += (w.gst !== undefined ? w.gst : 0);
+      months[m].grand += w.amount;
+    });
+    records.advance.forEach(a => {
+      const m = a.date.substring(0, 7);
+      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
+      months[m].advance += a.amount;
+    });
+    records.payment.forEach(p => {
+      const m = p.date.substring(0, 7);
+      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
+      months[m].payment += p.amount;
+    });
+    return months;
+  }
+
+  // Safe sheet name (Excel limit: 31 chars, no special chars)
+  function safeSheetName(name) {
+    return String(name).replace(/[\\\/\?\*\[\]:]/g, '_').substring(0, 31) || 'Sheet';
+  }
+
+  // Build a full worksheet for one company
+  function buildCompanySheet(company) {
+    const rec = data.records[company.id] || { work: [], advance: [], payment: [] };
+    const ws_data = [];
+
+    // Company info header
+    ws_data.push(['Company Details']);
+    ws_data.push(['Company Name', company.name]);
+    if (company.owner) ws_data.push(['Owner', company.owner]);
+    if (company.phone) ws_data.push(['Phone', company.phone]);
+    if (company.address) ws_data.push(['Address', company.address]);
+    if (company.gst) ws_data.push(['GST Number', company.gst]);
+    ws_data.push(['Default GST Rate', (company.defaultGst || 0) + '%']);
+    ws_data.push(['Report Generated', new Date().toLocaleString()]);
+    ws_data.push([]);
+
+    // WORK RECORDS
+    ws_data.push(['=== WORK RECORDS ===']);
+    ws_data.push(['Date', 'Work Name', 'Weight (kg)', 'Rate (₹/kg)', 'Base Amount (₹)', 'GST %', 'GST Amount (₹)', 'Total (₹)']);
+    let tw = 0, tb = 0, tg = 0, tgr = 0;
+    rec.work.forEach(w => {
+      const base = w.base !== undefined ? w.base : w.amount;
+      const gst = w.gst !== undefined ? w.gst : 0;
+      const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
+      tw += w.weight; tb += base; tg += gst; tgr += w.amount;
+      ws_data.push([w.date, w.name, w.weight, w.rate, base, gstPct + '%', gst, w.amount]);
+    });
+    ws_data.push(['TOTAL', '', tw, '', tb, '', tg, tgr]);
+    ws_data.push([]);
+
+    // ADVANCE RECORDS
+    ws_data.push(['=== ADVANCE RECORDS ===']);
+    ws_data.push(['Date', 'Amount (₹)', 'Note']);
+    let ta = 0;
+    rec.advance.forEach(a => {
+      ta += a.amount;
+      ws_data.push([a.date, a.amount, a.note || '']);
+    });
+    ws_data.push(['TOTAL ADVANCE', ta, '']);
+    ws_data.push([]);
+
+    // PAYMENT RECORDS
+    ws_data.push(['=== PAYMENT RECORDS ===']);
+    ws_data.push(['Date', 'Amount (₹)', 'Note']);
+    let tp = 0;
+    rec.payment.forEach(p => {
+      tp += p.amount;
+      ws_data.push([p.date, p.amount, p.note || '']);
+    });
+    ws_data.push(['TOTAL PAYMENT', tp, '']);
+    ws_data.push([]);
+
+    // FINAL SUMMARY
+    ws_data.push(['=== FINAL SUMMARY ===']);
+    ws_data.push(['Total Work (kg)', tw]);
+    ws_data.push(['Base Amount (₹)', tb]);
+    ws_data.push(['Total GST (₹)', tg]);
+    ws_data.push(['Grand Total (₹)', tgr]);
+    ws_data.push(['Total Advance (₹)', ta]);
+    ws_data.push(['Total Payment (₹)', tp]);
+    ws_data.push(['Total Received (₹)', ta + tp]);
+    ws_data.push(['Balance Due (₹)', tgr - ta - tp]);
+    ws_data.push([]);
+
+    // MONTH-WISE SUMMARY
+    ws_data.push(['=== MONTH-WISE SUMMARY ===']);
+    ws_data.push(['Month', 'Work (kg)', 'Base (₹)', 'GST (₹)', 'Grand Total (₹)', 'Advance (₹)', 'Payment (₹)', 'Balance (₹)']);
+    const months = buildCompanyMonthSummary(rec);
+    const keys = Object.keys(months).sort();
+    keys.forEach(m => {
+      const x = months[m];
+      ws_data.push([
+        monthName(m),
+        x.weight,
+        x.base,
+        x.gst,
+        x.grand,
+        x.advance,
+        x.payment,
+        x.grand - x.advance - x.payment
+      ]);
+    });
+
+    return XLSX.utils.aoa_to_sheet(ws_data);
+  }
+
+  // Build Overall Summary sheet
+  function buildOverallSheet() {
+    const ws_data = [];
+    ws_data.push(['📊 OVERALL SUMMARY - ALL COMPANIES']);
+    ws_data.push(['Report Generated', new Date().toLocaleString()]);
+    ws_data.push(['Total Companies', data.companies.length]);
+    ws_data.push([]);
+
+    ws_data.push(['Company', 'Owner', 'Phone', 'Work (kg)', 'Base (₹)', 'GST (₹)', 'Grand Total (₹)', 'Advance (₹)', 'Payment (₹)', 'Received (₹)', 'Balance (₹)']);
+
+    let oW = 0, oB = 0, oG = 0, oGr = 0, oA = 0, oP = 0, oBal = 0;
+    data.companies.forEach(c => {
+      const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+      const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+      const tb = rec.work.reduce((s, w) => s + (w.base !== undefined ? w.base : w.amount), 0);
+      const tg = rec.work.reduce((s, w) => s + (w.gst !== undefined ? w.gst : 0), 0);
+      const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+      const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+      const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+      const bal = tgr - ta - tp;
+      oW += tw; oB += tb; oG += tg; oGr += tgr; oA += ta; oP += tp; oBal += bal;
+      ws_data.push([c.name, c.owner || '', c.phone || '', tw, tb, tg, tgr, ta, tp, ta + tp, bal]);
+    });
+    ws_data.push(['OVERALL TOTAL', '', '', oW, oB, oG, oGr, oA, oP, oA + oP, oBal]);
+
+    return XLSX.utils.aoa_to_sheet(ws_data);
+  }
+
+  // Build month-wise summary for all companies
+  function buildMonthlySheet() {
+    const ws_data = [];
+    ws_data.push(['📅 MONTH-WISE SUMMARY - ALL COMPANIES']);
+    ws_data.push(['Report Generated', new Date().toLocaleString()]);
+    ws_data.push([]);
+    ws_data.push(['Company', 'Month', 'Work (kg)', 'Base (₹)', 'GST (₹)', 'Grand Total (₹)', 'Advance (₹)', 'Payment (₹)', 'Balance (₹)']);
+
+    data.companies.forEach(c => {
+      const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+      const months = buildCompanyMonthSummary(rec);
+      const keys = Object.keys(months).sort();
+      keys.forEach(m => {
+        const x = months[m];
+        ws_data.push([
+          c.name,
+          monthName(m),
+          x.weight, x.base, x.gst, x.grand, x.advance, x.payment,
+          x.grand - x.advance - x.payment
+        ]);
+      });
+      ws_data.push([]);
+    });
+
+    return XLSX.utils.aoa_to_sheet(ws_data);
+  }
+
+  // Build Company Comparison sheet
+  function buildComparisonSheet() {
+    const ws_data = [];
+    ws_data.push(['⚖️ COMPANY COMPARISON']);
+    ws_data.push([]);
+    ws_data.push(['Metric', ...data.companies.map(c => c.name)]);
+
+    const rows = [
+      ['Total Work (kg)', c => data.records[c.id]?.work.reduce((s, w) => s + w.weight, 0) || 0],
+      ['Grand Total (₹)', c => data.records[c.id]?.work.reduce((s, w) => s + w.amount, 0) || 0],
+      ['Total Advance (₹)', c => data.records[c.id]?.advance.reduce((s, a) => s + a.amount, 0) || 0],
+      ['Total Payment (₹)', c => data.records[c.id]?.payment.reduce((s, p) => s + p.amount, 0) || 0],
+      ['Received (₹)', c => {
+        const rec = data.records[c.id] || { advance: [], payment: [] };
+        return rec.advance.reduce((s, a) => s + a.amount, 0) + rec.payment.reduce((s, p) => s + p.amount, 0);
+      }],
+      ['Balance (₹)', c => {
+        const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+        const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+        const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+        const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+        return tgr - ta - tp;
+      }]
+    ];
+
+    rows.forEach(([label, fn]) => {
+      ws_data.push([label, ...data.companies.map(c => fn(c))]);
+    });
+
+    return XLSX.utils.aoa_to_sheet(ws_data);
+  }
+
+  // MAIN DOWNLOAD FUNCTION
+  function downloadExcel() {
+    if (!data.companies.length) {
+      alert('❌ Koi company nahi hai! Pehle company add karo.');
+      return;
+    }
+
+    const selected = document.querySelector('input[name="excelOption"]:checked')?.value || 'all';
+    const wb = XLSX.utils.book_new();
+    const now = new Date();
+    const ts = now.getFullYear() + '-' +
+      String(now.getMonth() + 1).padStart(2, '0') + '-' +
+      String(now.getDate()).padStart(2, '0') + '_' +
+      String(now.getHours()).padStart(2, '0') + '-' +
+      String(now.getMinutes()).padStart(2, '0');
+
+    try {
+      if (selected === 'active') {
+        // Only current company
+        const c = getActiveCompany();
+        if (!c) { alert('No active company!'); return; }
+        const ws = buildCompanySheet(c);
+        XLSX.utils.book_append_sheet(wb, ws, safeSheetName(c.name));
+        XLSX.writeFile(wb, `${c.name.replace(/\s+/g, '_')}_Report_${ts}.xlsx`);
+
+      } else if (selected === 'monthly') {
+        // Month-wise summary for all companies
+        const ws = buildMonthlySheet();
+        XLSX.utils.book_append_sheet(wb, ws, 'Month-wise Summary');
+        XLSX.writeFile(wb, `AllCompanies_MonthlySummary_${ts}.xlsx`);
+
+      } else {
+        // Full report: overall + each company + month-wise + comparison
+        // 1. Overall Summary
+        const wsOverall = buildOverallSheet();
+        XLSX.utils.book_append_sheet(wb, wsOverall, 'Overall Summary');
+
+        // 2. Company Comparison
+        if (data.companies.length > 1) {
+          const wsComp = buildComparisonSheet();
+          XLSX.utils.book_append_sheet(wb, wsComp, 'Company Comparison');
+        }
+
+        // 3. Month-wise Summary
+        const wsMonthly = buildMonthlySheet();
+        XLSX.utils.book_append_sheet(wb, wsMonthly, 'Month-wise Summary');
+
+        // 4. Each company's sheet
+        const usedNames = new Set(['Overall Summary', 'Company Comparison', 'Month-wise Summary']);
+        data.companies.forEach(c => {
+          let sheetName = safeSheetName(c.name);
+          let counter = 1;
+          while (usedNames.has(sheetName)) {
+            sheetName = safeSheetName(c.name).substring(0, 28) + '_' + counter;
+            counter++;
+          }
+          usedNames.add(sheetName);
+          const ws = buildCompanySheet(c);
+          XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        });
+
+        XLSX.writeFile(wb, `FabricationReport_${data.companies.length}Companies_${ts}.xlsx`);
+      }
+
+      showToast('📊 Excel file downloaded!', 'excel');
+    } catch (err) {
+      console.error(err);
+      alert('❌ Excel export failed: ' + err.message);
     }
   }
 
@@ -889,27 +1249,7 @@
   }
 
   function buildMonthlySummary() {
-    const rec = getActiveRecords();
-    const months = {};
-    rec.work.forEach(w => {
-      const m = w.date.substring(0, 7);
-      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
-      months[m].weight += w.weight;
-      months[m].base += (w.base !== undefined ? w.base : w.amount);
-      months[m].gst += (w.gst !== undefined ? w.gst : 0);
-      months[m].grand += w.amount;
-    });
-    rec.advance.forEach(a => {
-      const m = a.date.substring(0, 7);
-      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
-      months[m].advance += a.amount;
-    });
-    rec.payment.forEach(p => {
-      const m = p.date.substring(0, 7);
-      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
-      months[m].payment += p.amount;
-    });
-    return months;
+    return buildCompanyMonthSummary(getActiveRecords());
   }
 
   function formatMonth(m) {
@@ -1001,7 +1341,7 @@
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
-    if (ev) ev.target.classList.add('active');
+    if (ev && ev.target && ev.target.classList) ev.target.classList.add('active');
     if (name === 'allCompanies') renderAllCompaniesTable();
   }
 
@@ -1010,8 +1350,8 @@
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className = 'toast show ' + (type === 'info' ? 'info' : type === 'warn' ? 'warn' : type === 'wa' ? 'wa' : '');
-    setTimeout(() => t.className = 'toast', 2200);
+    t.className = 'toast show ' + (type === 'info' ? 'info' : type === 'warn' ? 'warn' : type === 'wa' ? 'wa' : type === 'excel' ? 'excel' : '');
+    setTimeout(() => t.className = 'toast', 2500);
   }
 
   // ===== Add / Delete =====
@@ -1300,6 +1640,7 @@
 
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); manualSave(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); downloadExcel(); }
     if (e.key === 'Escape') {
       closeCompanyModal();
       closeWhatsAppModal();
@@ -1325,6 +1666,9 @@
   renderAll();
   updateAutoSaveStatus();
   updatePreview();
+
+  // Default select first excel option
+  document.querySelector('.excel-option').classList.add('selected');
 
   if (!data.companies.length) {
     setTimeout(() => {

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fabrication Work Manager</title>
+<title>Fabrication Work Manager - Multi Company</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
   body { background: #f0f2f5; padding: 15px; color: #333; }
@@ -11,7 +11,6 @@
   h1 { text-align: center; color: #1a4d8f; margin-bottom: 5px; font-size: 24px; }
   .subtitle { text-align: center; color: #666; margin-bottom: 20px; font-size: 13px; }
 
-  /* Company header */
   .company-header { background: linear-gradient(135deg, #1a4d8f 0%, #2563eb 100%); color: #fff; border-radius: 10px; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 12px rgba(26,77,143,0.25); }
   .company-info { display: flex; flex-direction: column; }
   .company-name-display { font-size: 18px; font-weight: 700; }
@@ -19,17 +18,25 @@
   .company-header button { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); margin: 0; padding: 8px 14px; font-size: 13px; }
   .company-header button:hover { background: rgba(255,255,255,0.35); }
 
-  /* Save bar */
-  .save-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); flex-wrap: wrap; gap: 10px; }
-  .save-status { font-size: 13px; color: #666; display: flex; align-items: center; gap: 6px; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; background: #16a34a; display: inline-block; }
-  .dot.unsaved { background: #ea580c; animation: blink 1s infinite; }
-  @keyframes blink { 50% { opacity: 0.3; } }
-  .save-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .save-actions button { margin: 0; padding: 9px 16px; font-size: 13px; }
+  .company-selector { background: #fff; border-radius: 10px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .company-selector label { font-size: 13px; font-weight: 700; color: #1a4d8f; margin: 0; }
+  .company-selector select { flex: 1; min-width: 200px; padding: 10px; font-size: 14px; font-weight: 600; border: 2px solid #1a4d8f; border-radius: 6px; background: #f8fafc; }
+  .company-selector .count-badge { background: #e8eef7; color: #1a4d8f; padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 700; }
+  .company-selector button { margin: 0; padding: 9px 16px; font-size: 13px; }
+
+  .autosave-bar { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid #16a34a; border-radius: 10px; padding: 10px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .autosave-info { display: flex; align-items: center; gap: 10px; }
+  .autosave-icon { font-size: 20px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .autosave-text { font-size: 13px; font-weight: 700; color: #15803d; }
+  .autosave-time { font-size: 11px; color: #166534; margin-top: 2px; }
+  .autosave-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .autosave-actions button { margin: 0; padding: 8px 14px; font-size: 12px; }
 
   .card { background: #fff; border-radius: 10px; padding: 18px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-  .card h2 { color: #1a4d8f; font-size: 17px; margin-bottom: 12px; border-bottom: 2px solid #e8eef7; padding-bottom: 8px; }
+  .card h2 { color: #1a4d8f; font-size: 17px; margin-bottom: 12px; border-bottom: 2px solid #e8eef7; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .card h2 .head-actions { display: flex; gap: 8px; }
+  .card h2 .head-actions button { margin: 0; padding: 7px 12px; font-size: 12px; }
 
   .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
   label { display: block; font-size: 12px; color: #555; margin-bottom: 4px; font-weight: 600; }
@@ -43,21 +50,27 @@
   .btn-orange { background: #ea580c; } .btn-orange:hover { background: #c2410c; }
   .btn-blue { background: #2563eb; } .btn-blue:hover { background: #1d4ed8; }
   .btn-gray { background: #6b7280; } .btn-gray:hover { background: #4b5563; }
+  .btn-whatsapp { background: #25D366; } .btn-whatsapp:hover { background: #1da851; }
+  .btn-whatsapp-dark { background: #128C7E; } .btn-whatsapp-dark:hover { background: #0d6b60; }
 
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 15px; }
-  .stat-box { background: #fff; border-radius: 10px; padding: 15px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #1a4d8f; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px; }
+  .stat-box { background: #fff; border-radius: 10px; padding: 14px 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #1a4d8f; }
   .stat-box.green { border-left-color: #16a34a; }
   .stat-box.red { border-left-color: #dc2626; }
   .stat-box.orange { border-left-color: #ea580c; }
   .stat-box.purple { border-left-color: #7c3aed; }
-  .stat-box .label { font-size: 12px; color: #666; margin-bottom: 6px; }
-  .stat-box .value { font-size: 20px; font-weight: 700; color: #1a4d8f; }
+  .stat-box.teal { border-left-color: #0891b2; }
+  .stat-box.pink { border-left-color: #db2777; }
+  .stat-box .label { font-size: 11px; color: #666; margin-bottom: 5px; font-weight: 600; }
+  .stat-box .value { font-size: 18px; font-weight: 700; color: #1a4d8f; }
+  .stat-box .sub { font-size: 10px; color: #999; margin-top: 2px; }
   .stat-box.green .value { color: #16a34a; }
   .stat-box.red .value { color: #dc2626; }
   .stat-box.orange .value { color: #ea580c; }
   .stat-box.purple .value { color: #7c3aed; }
+  .stat-box.teal .value { color: #0891b2; }
+  .stat-box.pink .value { color: #db2777; }
 
-  /* Live preview box */
   .live-preview { background: #f0f9ff; border: 2px dashed #2563eb; border-radius: 8px; padding: 12px; margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
   .live-preview .lp-item { text-align: center; }
   .live-preview .lp-label { font-size: 11px; color: #666; font-weight: 600; text-transform: uppercase; }
@@ -81,10 +94,27 @@
   .badge-red { background: #fee2e2; color: #dc2626; }
   .badge-orange { background: #ffedd5; color: #ea580c; }
   .badge-purple { background: #ede9fe; color: #7c3aed; }
+  .badge-blue { background: #dbeafe; color: #2563eb; }
+  .badge-teal { background: #cffafe; color: #0891b2; }
 
   .empty { text-align: center; padding: 30px; color: #999; font-size: 14px; }
+  .action-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+  .action-btns button { padding: 5px 9px; font-size: 11px; margin: 0; }
 
-  /* Modal */
+  /* Total summary boxes in tabs */
+  .tab-total-box { margin-top:12px; padding:14px 16px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+  .tab-total-box .tt-label { font-size:13px; font-weight:700; }
+  .tab-total-box .tt-value { font-size:22px; font-weight:700; }
+  .tab-total-box.orange { background:#fff7ed; border-left:4px solid #ea580c; }
+  .tab-total-box.orange .tt-label { color:#c2410c; }
+  .tab-total-box.orange .tt-value { color:#ea580c; }
+  .tab-total-box.teal { background:#ecfeff; border-left:4px solid #0891b2; }
+  .tab-total-box.teal .tt-label { color:#0e7490; }
+  .tab-total-box.teal .tt-value { color:#0891b2; }
+  .tab-total-box.green { background:#f0fdf4; border-left:4px solid #16a34a; }
+  .tab-total-box.green .tt-label { color:#15803d; }
+  .tab-total-box.green .tt-value { color:#16a34a; }
+
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 15px; }
   .modal-overlay.show { display: flex; }
   .modal { background: #fff; border-radius: 12px; padding: 22px; max-width: 480px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; }
@@ -93,61 +123,97 @@
   .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
   .modal-btns button { flex: 1; margin: 0; }
 
+  .company-list { max-height: 400px; overflow-y: auto; margin: 10px 0; }
+  .company-list-item { background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; transition: all 0.2s; }
+  .company-list-item:hover { border-color: #1a4d8f; background: #f0f9ff; }
+  .company-list-item.active { border-color: #16a34a; background: #f0fdf4; }
+  .company-list-item .cli-info { flex: 1; }
+  .company-list-item .cli-name { font-weight: 700; color: #1a4d8f; font-size: 14px; }
+  .company-list-item .cli-meta { font-size: 11px; color: #666; margin-top: 3px; }
+  .company-list-item .cli-actions { display: flex; gap: 5px; }
+  .company-list-item .cli-actions button { padding: 5px 9px; font-size: 11px; margin: 0; }
+
+  .wa-preview { background: #e5ddd5; border-radius: 8px; padding: 15px; margin: 10px 0; max-height: 400px; overflow-y: auto; }
+  .wa-bubble { background: #fff; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); font-size: 13px; white-space: pre-wrap; line-height: 1.5; color: #111; word-wrap: break-word; }
+
   .hint { font-size: 11px; color: #888; margin-top: 3px; }
 
-  /* Toast notification */
   .toast { position: fixed; bottom: 20px; right: 20px; background: #16a34a; color: #fff; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-size: 14px; font-weight: 600; opacity: 0; transform: translateY(20px); transition: all 0.3s; z-index: 999; }
   .toast.show { opacity: 1; transform: translateY(0); }
   .toast.info { background: #2563eb; }
   .toast.warn { background: #ea580c; }
+  .toast.wa { background: #25D366; }
+
+  .save-flash { animation: flash 0.5s; }
+  @keyframes flash { 0% { background-color: #dcfce7; } 100% { background-color: transparent; } }
 
   @media (max-width: 600px) {
     h1 { font-size: 19px; }
-    .stat-box .value { font-size: 17px; }
+    .stat-box .value { font-size: 15px; }
     th, td { padding: 7px 5px; font-size: 12px; }
-    .save-bar { flex-direction: column; align-items: stretch; }
-    .save-actions button { flex: 1; }
     .company-name-display { font-size: 16px; }
+    .company-selector { flex-direction: column; align-items: stretch; }
+    .company-selector select { min-width: 100%; }
+    .autosave-bar { flex-direction: column; align-items: stretch; }
+    .autosave-actions button { flex: 1; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .tab-total-box .tt-value { font-size: 18px; }
   }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>🏗️ Fabrication Work Manager</h1>
-  <p class="subtitle">Manage iron purchases, structure work, payments and advances (with GST)</p>
+  <p class="subtitle">Multi-company records with automatic saving</p>
+
+  <!-- AUTO-SAVE STATUS BAR -->
+  <div class="autosave-bar" id="autosaveBar">
+    <div class="autosave-info">
+      <span class="autosave-icon" id="autosaveIcon">🟢</span>
+      <div>
+        <div class="autosave-text" id="autosaveText">✅ Auto-Save ON — All changes saved automatically</div>
+        <div class="autosave-time" id="autosaveTime">Every change is instantly saved</div>
+      </div>
+    </div>
+    <div class="autosave-actions">
+      <button class="btn-green" onclick="manualSave()">💾 Save Now</button>
+      <button class="btn-blue" onclick="exportSingleFile()">📤 Export Data File</button>
+      <button class="btn-orange" onclick="document.getElementById('importFile').click()">📥 Import Data File</button>
+      <input type="file" id="importFile" accept=".json,.fab" style="display:none" onchange="importSingleFile(event)">
+    </div>
+  </div>
+
+  <!-- COMPANY SELECTOR -->
+  <div class="company-selector">
+    <label>🏢 Active Company:</label>
+    <select id="companySelector" onchange="switchCompany(this.value)"></select>
+    <span class="count-badge" id="companyCount">0 Companies</span>
+    <button class="btn-green" onclick="openCompanyModal()">➕ Add New</button>
+    <button class="btn-blue" onclick="openManageCompaniesModal()">📋 Manage</button>
+  </div>
 
   <!-- COMPANY HEADER -->
   <div class="company-header">
     <div class="company-info">
-      <div class="company-name-display" id="companyNameDisplay">🏢 No Company Set</div>
-      <div class="company-owner-display" id="companyOwnerDisplay">Click "Edit Company" to add your company details</div>
+      <div class="company-name-display" id="companyNameDisplay">🏢 No Company Selected</div>
+      <div class="company-owner-display" id="companyOwnerDisplay">Add a company to get started</div>
     </div>
-    <button onclick="openCompanyModal()">✏️ Edit Company</button>
-  </div>
-
-  <!-- SAVE BAR -->
-  <div class="save-bar">
-    <div class="save-status">
-      <span class="dot" id="saveDot"></span>
-      <span id="saveStatusText">All changes saved</span>
-      <span style="color:#999; font-size:12px;" id="lastSaved"></span>
-    </div>
-    <div class="save-actions">
-      <button class="btn-green" onclick="manualSave()">💾 Save Now</button>
-      <button class="btn-blue" onclick="backupData()">📤 Download Backup</button>
-      <button class="btn-orange" onclick="document.getElementById('restoreFile').click()">📥 Restore Backup</button>
-      <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreData(event)">
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button onclick="editActiveCompany()">✏️ Edit Details</button>
+      <button class="btn-whatsapp" onclick="openWhatsAppModal()" style="background:#25D366; border:1px solid rgba(255,255,255,0.4);">📱 Share on WhatsApp</button>
     </div>
   </div>
 
-  <!-- Dashboard Stats -->
+  <!-- Dashboard Stats - SEPARATE ADVANCE & PAYMENT -->
   <div class="stats">
-    <div class="stat-box"><div class="label">Total Work (kg)</div><div class="value" id="statWork">0</div></div>
-    <div class="stat-box green"><div class="label">Base Earnings</div><div class="value" id="statEarning">₹0</div></div>
-    <div class="stat-box purple"><div class="label">Total GST</div><div class="value" id="statGst">₹0</div></div>
-    <div class="stat-box green"><div class="label">Grand Total (with GST)</div><div class="value" id="statGrand">₹0</div></div>
-    <div class="stat-box orange"><div class="label">Advance + Payment</div><div class="value" id="statAdvance">₹0</div></div>
-    <div class="stat-box red"><div class="label">Balance Due</div><div class="value" id="statDue">₹0</div></div>
+    <div class="stat-box"><div class="label">⚖️ Total Work</div><div class="value" id="statWork">0</div><div class="sub">kg</div></div>
+    <div class="stat-box green"><div class="label">💵 Base Earnings</div><div class="value" id="statEarning">₹0</div></div>
+    <div class="stat-box purple"><div class="label">📊 Total GST</div><div class="value" id="statGst">₹0</div></div>
+    <div class="stat-box green"><div class="label">✅ Grand Total</div><div class="value" id="statGrand">₹0</div><div class="sub">Base + GST</div></div>
+    <div class="stat-box orange"><div class="label">💰 Advance</div><div class="value" id="statAdvance">₹0</div><div class="sub">Total received</div></div>
+    <div class="stat-box teal"><div class="label">💵 Payment</div><div class="value" id="statPayment">₹0</div><div class="sub">Total received</div></div>
+    <div class="stat-box pink"><div class="label">📥 Total Received</div><div class="value" id="statReceived">₹0</div><div class="sub">Advance + Payment</div></div>
+    <div class="stat-box red"><div class="label">⚠️ Balance Due</div><div class="value" id="statDue">₹0</div><div class="sub">Grand − Received</div></div>
   </div>
 
   <!-- Tabs -->
@@ -156,12 +222,13 @@
     <button class="tab-btn" onclick="showTab('advance', event)">💰 Advances</button>
     <button class="tab-btn" onclick="showTab('payment', event)">💵 Payments</button>
     <button class="tab-btn" onclick="showTab('summary', event)">📊 Summary</button>
+    <button class="tab-btn" onclick="showTab('allCompanies', event)">🏢 All Companies</button>
   </div>
 
   <!-- WORK TAB -->
   <div id="tab-work" class="tab-content active">
     <div class="card">
-      <h2>Add New Work</h2>
+      <h2>Add New Work <span style="font-size:13px; color:#666; font-weight:normal;" id="workCompanyLabel"></span></h2>
       <div class="form-grid">
         <div><label>Date</label><input type="date" id="workDate"></div>
         <div><label>Structure / Work Name</label><input type="text" id="workName" placeholder="e.g. Gate, Grill"></div>
@@ -185,25 +252,25 @@
           </select>
         </div>
       </div>
-
-      <!-- Live Preview -->
       <div class="live-preview">
         <div class="lp-item"><div class="lp-label">Base Amount</div><div class="lp-value" id="lpBase">₹0</div></div>
         <div class="lp-item"><div class="lp-label">GST</div><div class="lp-value" id="lpGst">₹0</div></div>
         <div class="lp-item"><div class="lp-label">Grand Total</div><div class="lp-value total" id="lpTotal">₹0</div></div>
       </div>
-
       <button onclick="addWork()">➕ Add Work</button>
     </div>
     <div class="card">
-      <h2>Work Records</h2>
+      <h2>
+        <span>Work Records <span id="workCount" class="badge badge-blue"></span></span>
+        <div class="head-actions">
+          <button class="btn-whatsapp" onclick="shareWorkWhatsApp()">📱 Share All</button>
+        </div>
+      </h2>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th>Date</th><th>Work</th><th>Weight</th><th>Rate</th>
-              <th>Base Amount</th><th>GST</th><th>Total</th><th>Action</th>
-            </tr>
+            <tr><th>Date</th><th>Work</th><th>Weight</th><th>Rate</th>
+              <th>Base</th><th>GST</th><th>Total</th><th>Action</th></tr>
           </thead>
           <tbody id="workTable"></tbody>
         </table>
@@ -214,7 +281,7 @@
   <!-- ADVANCE TAB -->
   <div id="tab-advance" class="tab-content">
     <div class="card">
-      <h2>Add Advance (Money Received from Company)</h2>
+      <h2>Add Advance <span style="font-size:13px; color:#666; font-weight:normal;" id="advCompanyLabel"></span></h2>
       <div class="form-grid">
         <div><label>Date</label><input type="date" id="advDate"></div>
         <div><label>Amount (₹)</label><input type="number" id="advAmount" placeholder="0" step="0.01"></div>
@@ -223,12 +290,21 @@
       <button class="btn-orange" onclick="addAdvance()">➕ Add Advance</button>
     </div>
     <div class="card">
-      <h2>Advance Records</h2>
+      <h2>
+        <span>Advance Records <span id="advCount" class="badge badge-orange"></span></span>
+        <div class="head-actions">
+          <button class="btn-whatsapp" onclick="shareAdvanceWhatsApp()">📱 Share All</button>
+        </div>
+      </h2>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Date</th><th>Amount</th><th>Note</th><th>Action</th></tr></thead>
           <tbody id="advanceTable"></tbody>
         </table>
+      </div>
+      <div class="tab-total-box orange">
+        <div class="tt-label">💰 TOTAL ADVANCE RECEIVED</div>
+        <div class="tt-value" id="advanceTotalBox">₹0</div>
       </div>
     </div>
   </div>
@@ -236,7 +312,7 @@
   <!-- PAYMENT TAB -->
   <div id="tab-payment" class="tab-content">
     <div class="card">
-      <h2>Add Payment (Money Paid by Company)</h2>
+      <h2>Add Payment <span style="font-size:13px; color:#666; font-weight:normal;" id="payCompanyLabel"></span></h2>
       <div class="form-grid">
         <div><label>Date</label><input type="date" id="payDate"></div>
         <div><label>Amount (₹)</label><input type="number" id="payAmount" placeholder="0" step="0.01"></div>
@@ -245,12 +321,25 @@
       <button class="btn-green" onclick="addPayment()">➕ Add Payment</button>
     </div>
     <div class="card">
-      <h2>Payment Records</h2>
+      <h2>
+        <span>Payment Records <span id="payCount" class="badge badge-teal"></span></span>
+        <div class="head-actions">
+          <button class="btn-whatsapp" onclick="sharePaymentWhatsApp()">📱 Share All</button>
+        </div>
+      </h2>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Date</th><th>Amount</th><th>Note</th><th>Action</th></tr></thead>
           <tbody id="paymentTable"></tbody>
         </table>
+      </div>
+      <div class="tab-total-box teal">
+        <div class="tt-label">💵 TOTAL PAYMENT RECEIVED</div>
+        <div class="tt-value" id="paymentTotalBox">₹0</div>
+      </div>
+      <div class="tab-total-box green" style="margin-top:8px;">
+        <div class="tt-label">📥 GRAND TOTAL RECEIVED (Advance + Payment)</div>
+        <div class="tt-value" id="receivedTotalBox">₹0</div>
       </div>
     </div>
   </div>
@@ -258,30 +347,62 @@
   <!-- SUMMARY TAB -->
   <div id="tab-summary" class="tab-content">
     <div class="card">
-      <h2>📊 Full Summary (Month-wise)</h2>
+      <h2>
+        <span>📊 Full Summary (Month-wise) <span id="sumCompanyLabel" style="font-size:13px; color:#666; font-weight:normal;"></span></span>
+        <div class="head-actions">
+          <button class="btn-whatsapp" onclick="shareSummaryWhatsApp()">📱 Share Summary</button>
+          <button class="btn-whatsapp-dark" onclick="shareFullReportWhatsApp()">📊 Full Report</button>
+        </div>
+      </h2>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th>Month</th><th>Work (kg)</th><th>Base</th><th>GST</th>
-              <th>Grand Total</th><th>Advance</th><th>Payment</th><th>Balance</th>
-            </tr>
+            <tr><th>Month</th><th>Work (kg)</th><th>Base</th><th>GST</th>
+              <th>Grand Total</th><th>Advance</th><th>Payment</th><th>Balance</th></tr>
           </thead>
           <tbody id="summaryTable"></tbody>
         </table>
       </div>
     </div>
     <div class="card">
-      <button class="btn-red" onclick="clearAll()">🗑️ Clear All Data</button>
+      <button class="btn-red" onclick="clearAll()">🗑️ Clear This Company's Data</button>
       <button class="btn-green" onclick="exportData()" style="margin-left:8px;">📥 Export CSV</button>
+    </div>
+  </div>
+
+  <!-- ALL COMPANIES TAB -->
+  <div id="tab-allCompanies" class="tab-content">
+    <div class="card">
+      <h2>🏢 All Companies Overview</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Company</th><th>Owner</th><th>Phone</th>
+              <th>Work (kg)</th><th>Grand Total</th><th>Advance</th><th>Payment</th><th>Balance</th><th>Action</th></tr>
+          </thead>
+          <tbody id="allCompaniesTable"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:15px; padding:12px; background:#f0f9ff; border-radius:8px; border-left:4px solid #2563eb;">
+        <div style="font-size:12px; color:#666; margin-bottom:5px;">📊 OVERALL TOTAL (All Companies)</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-top:8px;">
+          <div><div style="font-size:11px; color:#666;">Total Work</div><div style="font-size:16px; font-weight:700; color:#1a4d8f;" id="overallWork">0 kg</div></div>
+          <div><div style="font-size:11px; color:#666;">Grand Total</div><div style="font-size:16px; font-weight:700; color:#16a34a;" id="overallGrand">₹0</div></div>
+          <div><div style="font-size:11px; color:#666;">Total Advance</div><div style="font-size:16px; font-weight:700; color:#ea580c;" id="overallAdvance">₹0</div></div>
+          <div><div style="font-size:11px; color:#666;">Total Payment</div><div style="font-size:16px; font-weight:700; color:#0891b2;" id="overallPayment">₹0</div></div>
+          <div><div style="font-size:11px; color:#666;">Total Received</div><div style="font-size:16px; font-weight:700; color:#db2777;" id="overallReceived">₹0</div></div>
+          <div><div style="font-size:11px; color:#666;">Balance</div><div style="font-size:16px; font-weight:700; color:#dc2626;" id="overallBalance">₹0</div></div>
+        </div>
+      </div>
+      <button class="btn-whatsapp" onclick="shareAllCompaniesWhatsApp()" style="margin-top:12px;">📱 Share All Companies Summary</button>
     </div>
   </div>
 </div>
 
-<!-- COMPANY MODAL -->
+<!-- COMPANY ADD/EDIT MODAL -->
 <div class="modal-overlay" id="companyModal">
   <div class="modal">
-    <h3>🏢 Company Details</h3>
+    <h3 id="companyModalTitle">🏢 Add New Company</h3>
     <div class="form-grid">
       <div><label>Company Name *</label><input type="text" id="companyNameInput" placeholder="e.g. Sharma Fabrication Works"></div>
       <div><label>Owner / Contact Person</label><input type="text" id="companyOwnerInput" placeholder="e.g. Rajesh Sharma"></div>
@@ -297,12 +418,43 @@
           <option value="18" selected>18% (Standard)</option>
           <option value="28">28%</option>
         </select>
-        <div class="hint">This will be the default GST rate for new work entries</div>
       </div>
     </div>
     <div class="modal-btns">
       <button class="btn-gray" onclick="closeCompanyModal()">Cancel</button>
-      <button class="btn-green" onclick="saveCompanyDetails()">💾 Save Company</button>
+      <button class="btn-green" onclick="saveCompanyDetails()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE COMPANIES MODAL -->
+<div class="modal-overlay" id="manageCompaniesModal">
+  <div class="modal" style="max-width: 600px;">
+    <h3>📋 Manage Companies</h3>
+    <div class="company-list" id="companyListContainer"></div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="closeManageCompaniesModal()">Close</button>
+      <button class="btn-green" onclick="closeManageCompaniesModal(); openCompanyModal();">➕ Add New Company</button>
+    </div>
+  </div>
+</div>
+
+<!-- WHATSAPP SHARE MODAL -->
+<div class="modal-overlay" id="waModal">
+  <div class="modal" style="max-width: 600px;">
+    <h3>📱 Share on WhatsApp</h3>
+    <div style="margin-bottom:12px;">
+      <label>Send To (Optional)</label>
+      <input type="text" id="waPhone" placeholder="e.g. 919876543210">
+      <div class="hint">Leave empty to choose contact in WhatsApp</div>
+    </div>
+    <label>Message Preview</label>
+    <div class="wa-preview">
+      <div class="wa-bubble" id="waPreviewText"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="closeWhatsAppModal()">Cancel</button>
+      <button class="btn-whatsapp" onclick="sendWhatsApp()">📱 Open WhatsApp</button>
     </div>
   </div>
 </div>
@@ -311,33 +463,307 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ===== Data =====
-  let data = {
-    work: JSON.parse(localStorage.getItem('fab_work') || '[]'),
-    advance: JSON.parse(localStorage.getItem('fab_advance') || '[]'),
-    payment: JSON.parse(localStorage.getItem('fab_payment') || '[]'),
-    company: JSON.parse(localStorage.getItem('fab_company') || '{}')
-  };
+  const STORAGE_KEY = 'fab_multicompany_autosave';
+  const FILE_EXTENSION = '.fab';
 
+  let data = loadData();
   let hasUnsavedChanges = false;
+  let editingCompanyId = null;
+  let autoSaveTimer = null;
+
+  // ===== LOAD DATA =====
+  function loadData() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try { return JSON.parse(stored); } catch (e) { console.error('Load error:', e); }
+    }
+    const oldMulti = localStorage.getItem('fab_multicompany');
+    if (oldMulti) {
+      try {
+        const d = JSON.parse(oldMulti);
+        if (d.companies) return d;
+      } catch (e) {}
+    }
+    const oldCompany = JSON.parse(localStorage.getItem('fab_company') || 'null');
+    const oldWork = JSON.parse(localStorage.getItem('fab_work') || '[]');
+    const oldAdvance = JSON.parse(localStorage.getItem('fab_advance') || '[]');
+    const oldPayment = JSON.parse(localStorage.getItem('fab_payment') || '[]');
+    if (oldCompany && oldCompany.name) {
+      const cid = Date.now();
+      return {
+        companies: [{ id: cid, ...oldCompany }],
+        activeCompanyId: cid,
+        records: { [cid]: { work: oldWork, advance: oldAdvance, payment: oldPayment } },
+        lastAutoSave: new Date().toISOString()
+      };
+    }
+    return { companies: [], activeCompanyId: null, records: {}, lastAutoSave: null };
+  }
+
+  // ===== AUTO-SAVE =====
+  function autoSave(showFlash = true) {
+    data.lastAutoSave = new Date().toISOString();
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.error('Save failed:', e);
+      alert('⚠️ Save failed! Storage full. Please export your data.');
+      return;
+    }
+    hasUnsavedChanges = false;
+    updateAutoSaveStatus();
+    if (showFlash) {
+      const bar = document.getElementById('autosaveBar');
+      bar.classList.remove('save-flash');
+      void bar.offsetWidth;
+      bar.classList.add('save-flash');
+    }
+  }
+
+  function scheduleAutoSave() {
+    hasUnsavedChanges = true;
+    updateAutoSaveStatus();
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => autoSave(), 400);
+  }
+
+  function manualSave() {
+    autoSave();
+    showToast('💾 All data saved!', 'success');
+  }
+
+  function updateAutoSaveStatus() {
+    const icon = document.getElementById('autosaveIcon');
+    const text = document.getElementById('autosaveText');
+    const time = document.getElementById('autosaveTime');
+    if (hasUnsavedChanges) {
+      icon.textContent = '🟠';
+      text.textContent = '⏳ Saving...';
+      text.style.color = '#ea580c';
+    } else {
+      icon.textContent = '🟢';
+      text.textContent = '✅ Auto-Save ON — All changes saved';
+      text.style.color = '#15803d';
+    }
+    if (data.lastAutoSave) {
+      const d = new Date(data.lastAutoSave);
+      time.textContent = 'Last saved: ' + d.toLocaleString();
+    }
+  }
+
+  // ===== EXPORT/IMPORT =====
+  function exportSingleFile() {
+    autoSave(false);
+    const exportData = {
+      app: 'FabricationWorkManager',
+      version: 6,
+      format: 'multi-company-single-file',
+      exportedAt: new Date().toISOString(),
+      data: data
+    };
+    const json = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    const now = new Date();
+    const ts = now.getFullYear() + '-' +
+      String(now.getMonth() + 1).padStart(2, '0') + '-' +
+      String(now.getDate()).padStart(2, '0') + '_' +
+      String(now.getHours()).padStart(2, '0') + '-' +
+      String(now.getMinutes()).padStart(2, '0');
+    link.download = `FabricationData_${data.companies.length}Companies_${ts}${FILE_EXTENSION}.json`;
+    link.click();
+    showToast('📤 Data file exported!', 'info');
+  }
+
+  function importSingleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        const restored = parsed.data || parsed;
+        if (!restored.companies || !restored.records) {
+          if (restored.work && restored.advance && restored.payment) {
+            if (!confirm('Old backup detected. Import as new company?')) return;
+            const cid = Date.now();
+            const cname = (restored.company && restored.company.name) || 'Imported Company';
+            data.companies.push({ id: cid, name: cname, owner: restored.company?.owner || '', phone: restored.company?.phone || '', address: restored.company?.address || '', gst: restored.company?.gst || '', defaultGst: restored.company?.defaultGst || 18 });
+            data.records[cid] = { work: restored.work, advance: restored.advance, payment: restored.payment };
+            data.activeCompanyId = cid;
+            autoSave(); renderAll();
+            showToast('📥 Imported!', 'success');
+            return;
+          }
+          throw new Error('Invalid file format');
+        }
+        const summary = `📥 Import Data File\n\n📁 File: ${file.name}\n🏢 Companies: ${restored.companies.length}\n\n⚠️ This will REPLACE all current data.\n\nContinue?`;
+        if (!confirm(summary)) { e.target.value = ''; return; }
+        data = restored;
+        autoSave(); renderAll();
+        showToast('📥 Data imported!', 'success');
+      } catch (err) {
+        alert('❌ Error: ' + err.message);
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  // ===== Company Management =====
+  function getActiveCompany() {
+    return data.companies.find(c => c.id === data.activeCompanyId);
+  }
+
+  function getActiveRecords() {
+    if (!data.activeCompanyId) return { work: [], advance: [], payment: [] };
+    if (!data.records[data.activeCompanyId]) {
+      data.records[data.activeCompanyId] = { work: [], advance: [], payment: [] };
+    }
+    return data.records[data.activeCompanyId];
+  }
+
+  function switchCompany(id) {
+    id = parseInt(id);
+    if (!id) return;
+    data.activeCompanyId = id;
+    autoSave();
+    renderAll();
+    showToast('🔄 Switched to ' + (getActiveCompany()?.name || 'Company'), 'info');
+  }
+
+  function openCompanyModal(companyId = null) {
+    editingCompanyId = companyId;
+    const modal = document.getElementById('companyModal');
+    const title = document.getElementById('companyModalTitle');
+    if (companyId) {
+      const c = data.companies.find(x => x.id === companyId);
+      if (!c) return;
+      title.textContent = '✏️ Edit Company';
+      document.getElementById('companyNameInput').value = c.name || '';
+      document.getElementById('companyOwnerInput').value = c.owner || '';
+      document.getElementById('companyPhoneInput').value = c.phone || '';
+      document.getElementById('companyAddressInput').value = c.address || '';
+      document.getElementById('companyGstInput').value = c.gst || '';
+      document.getElementById('companyDefaultGst').value = c.defaultGst || '18';
+    } else {
+      title.textContent = '🏢 Add New Company';
+      document.getElementById('companyNameInput').value = '';
+      document.getElementById('companyOwnerInput').value = '';
+      document.getElementById('companyPhoneInput').value = '';
+      document.getElementById('companyAddressInput').value = '';
+      document.getElementById('companyGstInput').value = '';
+      document.getElementById('companyDefaultGst').value = '18';
+    }
+    modal.classList.add('show');
+    setTimeout(() => document.getElementById('companyNameInput').focus(), 100);
+  }
+
+  function closeCompanyModal() {
+    document.getElementById('companyModal').classList.remove('show');
+    editingCompanyId = null;
+  }
+
+  function editActiveCompany() {
+    if (!data.activeCompanyId) { alert('Please select or add a company first!'); return; }
+    openCompanyModal(data.activeCompanyId);
+  }
+
+  function saveCompanyDetails() {
+    const name = document.getElementById('companyNameInput').value.trim();
+    if (!name) { alert('Company name is required!'); return; }
+    const companyData = {
+      name: name,
+      owner: document.getElementById('companyOwnerInput').value.trim(),
+      phone: document.getElementById('companyPhoneInput').value.trim(),
+      address: document.getElementById('companyAddressInput').value.trim(),
+      gst: document.getElementById('companyGstInput').value.trim(),
+      defaultGst: parseFloat(document.getElementById('companyDefaultGst').value) || 18
+    };
+    if (editingCompanyId) {
+      const idx = data.companies.findIndex(c => c.id === editingCompanyId);
+      if (idx !== -1) data.companies[idx] = { id: editingCompanyId, ...companyData };
+      showToast('✏️ Company updated', 'success');
+    } else {
+      const newId = Date.now();
+      data.companies.push({ id: newId, ...companyData });
+      data.records[newId] = { work: [], advance: [], payment: [] };
+      data.activeCompanyId = newId;
+      showToast('➕ Company added', 'success');
+    }
+    autoSave();
+    closeCompanyModal();
+    renderAll();
+  }
+
+  function deleteCompany(companyId) {
+    const c = data.companies.find(x => x.id === companyId);
+    if (!c) return;
+    if (!confirm(`Delete "${c.name}" and ALL its records?\n\nThis cannot be undone!`)) return;
+    data.companies = data.companies.filter(x => x.id !== companyId);
+    delete data.records[companyId];
+    if (data.activeCompanyId === companyId) {
+      data.activeCompanyId = data.companies.length ? data.companies[0].id : null;
+    }
+    autoSave();
+    renderAll();
+    renderManageCompaniesList();
+    showToast('🗑️ Company deleted', 'warn');
+  }
+
+  function openManageCompaniesModal() {
+    renderManageCompaniesList();
+    document.getElementById('manageCompaniesModal').classList.add('show');
+  }
+
+  function closeManageCompaniesModal() {
+    document.getElementById('manageCompaniesModal').classList.remove('show');
+  }
+
+  function renderManageCompaniesList() {
+    const container = document.getElementById('companyListContainer');
+    if (!data.companies.length) {
+      container.innerHTML = '<div class="empty">No companies yet. Click "Add New Company" to get started.</div>';
+      return;
+    }
+    container.innerHTML = data.companies.map(c => {
+      const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+      const totalRecords = (rec.work?.length || 0) + (rec.advance?.length || 0) + (rec.payment?.length || 0);
+      const isActive = c.id === data.activeCompanyId;
+      return `
+        <div class="company-list-item ${isActive ? 'active' : ''}">
+          <div class="cli-info">
+            <div class="cli-name">${c.name} ${isActive ? '✅ (Active)' : ''}</div>
+            <div class="cli-meta">
+              ${c.owner ? '👤 ' + c.owner + ' · ' : ''}
+              ${c.phone ? '📞 ' + c.phone + ' · ' : ''}
+              📊 ${totalRecords} records
+            </div>
+          </div>
+          <div class="cli-actions">
+            ${!isActive ? `<button class="btn-green" onclick="switchCompany(${c.id}); closeManageCompaniesModal();">Select</button>` : ''}
+            <button class="btn-blue" onclick="openCompanyModal(${c.id}); closeManageCompaniesModal();">Edit</button>
+            <button class="btn-red" onclick="deleteCompany(${c.id})">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 
   // ===== GST Calculator =====
   function calculateGst(weight, rate, gstPercent, gstType) {
     const baseValue = weight * rate;
     let base, gst, total;
-
     if (gstType === 'inclusive') {
-      // GST already included in rate
       total = baseValue;
       base = total / (1 + gstPercent / 100);
       gst = total - base;
     } else {
-      // Add GST on top
       base = baseValue;
       gst = base * gstPercent / 100;
       total = base + gst;
     }
-
     return {
       base: Math.round(base * 100) / 100,
       gst: Math.round(gst * 100) / 100,
@@ -346,182 +772,237 @@
     };
   }
 
-  // ===== Live Preview =====
   function updatePreview() {
     const weight = parseFloat(document.getElementById('workWeight').value) || 0;
     const rate = parseFloat(document.getElementById('workRate').value) || 0;
     const gstPercent = parseFloat(document.getElementById('workGst').value) || 0;
     const gstType = document.getElementById('workGstType').value;
-
     const calc = calculateGst(weight, rate, gstPercent, gstType);
     document.getElementById('lpBase').textContent = fmt(calc.base);
     document.getElementById('lpGst').textContent = fmt(calc.gst);
     document.getElementById('lpTotal').textContent = fmt(calc.total);
   }
 
-  // ===== Company Functions =====
-  function openCompanyModal() {
-    document.getElementById('companyNameInput').value = data.company.name || '';
-    document.getElementById('companyOwnerInput').value = data.company.owner || '';
-    document.getElementById('companyPhoneInput').value = data.company.phone || '';
-    document.getElementById('companyAddressInput').value = data.company.address || '';
-    document.getElementById('companyGstInput').value = data.company.gst || '';
-    document.getElementById('companyDefaultGst').value = data.company.defaultGst || '18';
-    document.getElementById('companyModal').classList.add('show');
-  }
-
-  function closeCompanyModal() {
-    document.getElementById('companyModal').classList.remove('show');
-  }
-
-  function saveCompanyDetails() {
-    const name = document.getElementById('companyNameInput').value.trim();
-    if (!name) { alert('Company name is required!'); return; }
-
-    data.company = {
-      name: name,
-      owner: document.getElementById('companyOwnerInput').value.trim(),
-      phone: document.getElementById('companyPhoneInput').value.trim(),
-      address: document.getElementById('companyAddressInput').value.trim(),
-      gst: document.getElementById('companyGstInput').value.trim(),
-      defaultGst: parseFloat(document.getElementById('companyDefaultGst').value) || 18
-    };
-    autoSave();
-    renderCompany();
-    closeCompanyModal();
-    applyDefaultGst();
-    showToast('🏢 Company details saved!', 'success');
-  }
-
-  function renderCompany() {
-    const nameEl = document.getElementById('companyNameDisplay');
-    const ownerEl = document.getElementById('companyOwnerDisplay');
-
-    if (data.company.name) {
-      nameEl.textContent = '🏢 ' + data.company.name;
-      let details = [];
-      if (data.company.owner) details.push('👤 ' + data.company.owner);
-      if (data.company.phone) details.push('📞 ' + data.company.phone);
-      if (data.company.address) details.push('📍 ' + data.company.address);
-      if (data.company.gst) details.push('🧾 GST: ' + data.company.gst);
-      if (data.company.defaultGst) details.push('📊 Default GST: ' + data.company.defaultGst + '%');
-      ownerEl.textContent = details.length ? details.join('  •  ') : 'Click "Edit Company" to update details';
-    } else {
-      nameEl.textContent = '🏢 No Company Set';
-      ownerEl.textContent = 'Click "Edit Company" to add your company details';
-    }
-  }
-
-  // Apply company default GST to the work form
   function applyDefaultGst() {
-    if (data.company.defaultGst !== undefined) {
-      document.getElementById('workGst').value = data.company.defaultGst;
+    const c = getActiveCompany();
+    if (c && c.defaultGst !== undefined) {
+      document.getElementById('workGst').value = c.defaultGst;
       updatePreview();
     }
   }
 
-  // ===== Auto Save =====
-  function autoSave() {
-    localStorage.setItem('fab_work', JSON.stringify(data.work));
-    localStorage.setItem('fab_advance', JSON.stringify(data.advance));
-    localStorage.setItem('fab_payment', JSON.stringify(data.payment));
-    localStorage.setItem('fab_company', JSON.stringify(data.company));
-    localStorage.setItem('fab_lastSaved', new Date().toISOString());
-    hasUnsavedChanges = false;
-    updateSaveStatus();
+  // ===== WhatsApp Functions =====
+  function getCompanyHeader() {
+    const c = getActiveCompany();
+    if (!c) return '';
+    let header = `🏢 *${c.name}*\n`;
+    if (c.owner) header += `👤 ${c.owner}\n`;
+    if (c.phone) header += `📞 ${c.phone}\n`;
+    if (c.gst) header += `🧾 GST: ${c.gst}\n`;
+    header += `\n`;
+    return header;
   }
 
-  function manualSave() {
-    autoSave();
-    showToast('✅ Data saved successfully!', 'success');
-    updateSaveStatus(true);
+  function openWhatsAppModal(message) {
+    document.getElementById('waPreviewText').textContent = message;
+    document.getElementById('waPhone').value = '';
+    document.getElementById('waModal').classList.add('show');
   }
 
-  function markUnsaved() {
-    hasUnsavedChanges = true;
-    updateSaveStatus();
+  function closeWhatsAppModal() { document.getElementById('waModal').classList.remove('show'); }
+
+  function sendWhatsApp() {
+    const phone = document.getElementById('waPhone').value.trim().replace(/[^0-9]/g, '');
+    const msg = document.getElementById('waPreviewText').textContent;
+    const encoded = encodeURIComponent(msg);
+    const url = phone ? `https://wa.me/${phone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+    window.open(url, '_blank');
+    closeWhatsAppModal();
+    showToast('📱 WhatsApp opened!', 'wa');
   }
 
-  function updateSaveStatus(justSaved = false) {
-    const dot = document.getElementById('saveDot');
-    const txt = document.getElementById('saveStatusText');
-    const last = document.getElementById('lastSaved');
-    const savedTime = localStorage.getItem('fab_lastSaved');
+  function shareWorkItemWhatsApp(id) {
+    const w = getActiveRecords().work.find(x => x.id === id);
+    if (!w) return;
+    const base = w.base !== undefined ? w.base : w.amount;
+    const gst = w.gst !== undefined ? w.gst : 0;
+    const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
+    let msg = getCompanyHeader();
+    msg += `📦 *WORK DETAILS*\n━━━━━━━━━━━━━━━━━━\n`;
+    msg += `📅 Date: ${w.date}\n🔧 Work: ${w.name}\n⚖️ Weight: ${w.weight} kg\n💰 Rate: ₹${w.rate}/kg\n💵 Base: ${fmt(base)}\n`;
+    if (gstPct > 0) msg += `📊 GST @ ${gstPct}%: ${fmt(gst)}\n`;
+    msg += `━━━━━━━━━━━━━━━━━━\n✅ *TOTAL: ${fmt(w.amount)}*\n`;
+    openWhatsAppModal(msg);
+  }
 
-    if (hasUnsavedChanges) {
-      dot.classList.add('unsaved');
-      txt.textContent = '⚠️ Unsaved changes (Click Save)';
-      txt.style.color = '#ea580c';
-    } else {
-      dot.classList.remove('unsaved');
-      txt.textContent = justSaved ? '✅ Saved just now' : 'All changes saved';
-      txt.style.color = '#16a34a';
+  function shareWorkWhatsApp() {
+    const rec = getActiveRecords();
+    if (!rec.work.length) { alert('No work records!'); return; }
+    let msg = getCompanyHeader();
+    msg += `📦 *WORK RECORDS*\n━━━━━━━━━━━━━━━━━━\n`;
+    let tw = 0, tb = 0, tg = 0, tgr = 0;
+    rec.work.forEach((w, i) => {
+      const base = w.base !== undefined ? w.base : w.amount;
+      const gst = w.gst !== undefined ? w.gst : 0;
+      const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
+      tw += w.weight; tb += base; tg += gst; tgr += w.amount;
+      msg += `\n${i + 1}. *${w.name}*\n   📅 ${w.date}\n   ⚖️ ${w.weight} kg × ₹${w.rate} = ${fmt(base)}\n`;
+      if (gstPct > 0) msg += `   📊 GST ${gstPct}% = ${fmt(gst)}\n`;
+      msg += `   ✅ *Total: ${fmt(w.amount)}*\n`;
+    });
+    msg += `\n━━━━━━━━━━━━━━━━━━\n📊 *GRAND TOTAL*\n⚖️ Total Weight: ${tw.toFixed(2)} kg\n💵 Base: ${fmt(tb)}\n`;
+    if (tg > 0) msg += `📊 GST: ${fmt(tg)}\n`;
+    msg += `✅ *Total: ${fmt(tgr)}*\n\n📅 ${new Date().toLocaleString()}`;
+    openWhatsAppModal(msg);
+  }
+
+  function shareAdvanceWhatsApp() {
+    const rec = getActiveRecords();
+    if (!rec.advance.length) { alert('No advance records!'); return; }
+    let msg = getCompanyHeader();
+    msg += `💰 *ADVANCE RECORDS*\n━━━━━━━━━━━━━━━━━━\n`;
+    let total = 0;
+    rec.advance.forEach((a, i) => {
+      total += a.amount;
+      msg += `\n${i + 1}. 📅 ${a.date} — *${fmt(a.amount)}*`;
+      if (a.note) msg += `\n   📝 ${a.note}`;
+      msg += `\n`;
+    });
+    msg += `\n━━━━━━━━━━━━━━━━━━\n💰 *TOTAL ADVANCE: ${fmt(total)}*\n\n📅 ${new Date().toLocaleString()}`;
+    openWhatsAppModal(msg);
+  }
+
+  function sharePaymentWhatsApp() {
+    const rec = getActiveRecords();
+    if (!rec.payment.length) { alert('No payment records!'); return; }
+    let msg = getCompanyHeader();
+    msg += `💵 *PAYMENT RECORDS*\n━━━━━━━━━━━━━━━━━━\n`;
+    let total = 0;
+    rec.payment.forEach((p, i) => {
+      total += p.amount;
+      msg += `\n${i + 1}. 📅 ${p.date} — *${fmt(p.amount)}*`;
+      if (p.note) msg += `\n   📝 ${p.note}`;
+      msg += `\n`;
+    });
+    msg += `\n━━━━━━━━━━━━━━━━━━\n💵 *TOTAL PAYMENT: ${fmt(total)}*\n\n📅 ${new Date().toLocaleString()}`;
+    openWhatsAppModal(msg);
+  }
+
+  function buildMonthlySummary() {
+    const rec = getActiveRecords();
+    const months = {};
+    rec.work.forEach(w => {
+      const m = w.date.substring(0, 7);
+      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
+      months[m].weight += w.weight;
+      months[m].base += (w.base !== undefined ? w.base : w.amount);
+      months[m].gst += (w.gst !== undefined ? w.gst : 0);
+      months[m].grand += w.amount;
+    });
+    rec.advance.forEach(a => {
+      const m = a.date.substring(0, 7);
+      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
+      months[m].advance += a.amount;
+    });
+    rec.payment.forEach(p => {
+      const m = p.date.substring(0, 7);
+      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
+      months[m].payment += p.amount;
+    });
+    return months;
+  }
+
+  function formatMonth(m) {
+    const [y, mo] = m.split('-');
+    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return names[parseInt(mo) - 1] + ' ' + y;
+  }
+
+  function shareSummaryWhatsApp() {
+    const rec = getActiveRecords();
+    if (!rec.work.length && !rec.advance.length && !rec.payment.length) { alert('No records!'); return; }
+    const months = buildMonthlySummary();
+    const keys = Object.keys(months).sort().reverse();
+    let msg = getCompanyHeader();
+    msg += `📊 *MONTHLY SUMMARY*\n━━━━━━━━━━━━━━━━━━\n`;
+    keys.forEach(m => {
+      const x = months[m];
+      const dueM = x.grand - x.advance - x.payment;
+      msg += `\n📅 *${formatMonth(m)}*\n   ⚖️ Work: ${x.weight.toFixed(2)} kg\n   💵 Base: ${fmt(x.base)}\n`;
+      if (x.gst > 0) msg += `   📊 GST: ${fmt(x.gst)}\n`;
+      msg += `   ✅ Total: ${fmt(x.grand)}\n   💰 Advance: ${fmt(x.advance)}\n   💵 Payment: ${fmt(x.payment)}\n   ⚠️ Balance: *${fmt(dueM)}*\n`;
+    });
+    const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+    const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+    const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+    msg += `\n━━━━━━━━━━━━━━━━━━\n📊 *OVERALL*\n✅ Grand Total: ${fmt(tgr)}\n💰 Advance: ${fmt(ta)}\n💵 Payment: ${fmt(tp)}\n📥 Received: ${fmt(ta + tp)}\n⚠️ *Balance: ${fmt(tgr - ta - tp)}*\n\n📅 ${new Date().toLocaleString()}`;
+    openWhatsAppModal(msg);
+  }
+
+  function shareFullReportWhatsApp() {
+    const rec = getActiveRecords();
+    if (!rec.work.length) { alert('No records!'); return; }
+    let msg = getCompanyHeader();
+    msg += `📋 *FULL REPORT*\n━━━━━━━━━━━━━━━━━━\n\n📦 *WORK RECORDS (${rec.work.length})*\n─────────────────\n`;
+    rec.work.slice().reverse().forEach((w, i) => {
+      const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
+      msg += `\n${i + 1}. ${w.name}\n   📅 ${w.date}\n   ⚖️ ${w.weight} kg × ₹${w.rate} = ${fmt(w.amount)}\n`;
+      if (gstPct > 0) msg += `   📊 (incl. ${gstPct}% GST)\n`;
+    });
+    if (rec.advance.length) {
+      msg += `\n━━━━━━━━━━━━━━━━━━\n💰 *ADVANCES (${rec.advance.length})*\n─────────────────\n`;
+      let t = 0;
+      rec.advance.slice().reverse().forEach((a, i) => {
+        t += a.amount;
+        msg += `${i + 1}. ${a.date} — ${fmt(a.amount)}${a.note ? ' (' + a.note + ')' : ''}\n`;
+      });
+      msg += `*Total Advance: ${fmt(t)}*\n`;
     }
-
-    if (savedTime) {
-      const d = new Date(savedTime);
-      last.textContent = '| Last saved: ' + d.toLocaleString();
+    if (rec.payment.length) {
+      msg += `\n━━━━━━━━━━━━━━━━━━\n💵 *PAYMENTS (${rec.payment.length})*\n─────────────────\n`;
+      let t = 0;
+      rec.payment.slice().reverse().forEach((p, i) => {
+        t += p.amount;
+        msg += `${i + 1}. ${p.date} — ${fmt(p.amount)}${p.note ? ' (' + p.note + ')' : ''}\n`;
+      });
+      msg += `*Total Payment: ${fmt(t)}*\n`;
     }
+    const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+    const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+    const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+    msg += `\n━━━━━━━━━━━━━━━━━━\n📊 *FINAL SUMMARY*\n✅ Grand Total: ${fmt(tgr)}\n💰 Advance: ${fmt(ta)}\n💵 Payment: ${fmt(tp)}\n📥 Total Received: ${fmt(ta + tp)}\n⚠️ *Balance: ${fmt(tgr - ta - tp)}*\n\n📅 ${new Date().toLocaleString()}`;
+    openWhatsAppModal(msg);
   }
 
-  // ===== Backup / Restore =====
-  function backupData() {
-    const backup = {
-      app: 'FabricationWorkManager',
-      version: 2,
-      savedAt: new Date().toISOString(),
-      data: data
-    };
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-    const companyName = data.company.name ? data.company.name.replace(/\s+/g, '_') : 'fabrication';
-    link.download = `${companyName}_backup_${ts}.json`;
-    link.click();
-    showToast('📤 Backup downloaded!', 'info');
-  }
-
-  function restoreData(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const parsed = JSON.parse(ev.targetresult || ev.target.result);
-        const restored = parsed.data || parsed;
-        if (!restored.work || !restored.advance || !restored.payment) {
-          throw new Error('Invalid backup file');
-        }
-        if (!confirm('This will replace your current data. Continue?')) return;
-        data.work = restored.work;
-        data.advance = restored.advance;
-        data.payment = restored.payment;
-        if (restored.company) data.company = restored.company;
-        autoSave();
-        render();
-        renderCompany();
-        applyDefaultGst();
-        showToast('📥 Backup restored!', 'success');
-      } catch (err) {
-        alert('Error reading file: ' + err.message);
-      }
-      e.target.value = '';
-    };
-    reader.readAsText(file);
+  function shareAllCompaniesWhatsApp() {
+    if (!data.companies.length) { alert('No companies!'); return; }
+    let msg = `🏢 *ALL COMPANIES SUMMARY*\n━━━━━━━━━━━━━━━━━━\n\n`;
+    let oWork = 0, oGrand = 0, oAdv = 0, oPay = 0, oDue = 0;
+    data.companies.forEach(c => {
+      const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+      const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+      const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+      const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+      const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+      const due = tgr - ta - tp;
+      oWork += tw; oGrand += tgr; oAdv += ta; oPay += tp; oDue += due;
+      msg += `📌 *${c.name}*${c.id === data.activeCompanyId ? ' ✅' : ''}\n`;
+      if (c.owner) msg += `   👤 ${c.owner}\n`;
+      msg += `   ⚖️ Work: ${tw.toFixed(2)} kg\n   ✅ Grand Total: ${fmt(tgr)}\n   💰 Advance: ${fmt(ta)}\n   💵 Payment: ${fmt(tp)}\n   ⚠️ Balance: *${fmt(due)}*\n\n`;
+    });
+    msg += `━━━━━━━━━━━━━━━━━━\n📊 *OVERALL TOTAL*\n🏢 Companies: ${data.companies.length}\n⚖️ Total Work: ${oWork.toFixed(2)} kg\n✅ Grand Total: ${fmt(oGrand)}\n💰 Total Advance: ${fmt(oAdv)}\n💵 Total Payment: ${fmt(oPay)}\n📥 Total Received: ${fmt(oAdv + oPay)}\n⚠️ *Total Balance: ${fmt(oDue)}*\n\n📅 ${new Date().toLocaleString()}`;
+    openWhatsAppModal(msg);
   }
 
   // ===== Helpers =====
   function today() { return new Date().toISOString().split('T')[0]; }
-  document.getElementById('workDate').value = today();
-  document.getElementById('advDate').value = today();
-  document.getElementById('payDate').value = today();
 
   function showTab(name, ev) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
     if (ev) ev.target.classList.add('active');
+    if (name === 'allCompanies') renderAllCompaniesTable();
   }
 
   function fmt(n) { return '₹' + Number(n).toLocaleString('en-IN', {maximumFractionDigits:2, minimumFractionDigits:2}); }
@@ -529,147 +1010,188 @@
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className = 'toast show ' + (type === 'info' ? 'info' : type === 'warn' ? 'warn' : '');
+    t.className = 'toast show ' + (type === 'info' ? 'info' : type === 'warn' ? 'warn' : type === 'wa' ? 'wa' : '');
     setTimeout(() => t.className = 'toast', 2200);
   }
 
   // ===== Add / Delete =====
   function addWork() {
+    if (!data.activeCompanyId) { alert('Please add or select a company first!'); return; }
     const date = document.getElementById('workDate').value;
     const name = document.getElementById('workName').value.trim();
     const weight = parseFloat(document.getElementById('workWeight').value);
     const rate = parseFloat(document.getElementById('workRate').value);
     const gstPercent = parseFloat(document.getElementById('workGst').value) || 0;
     const gstType = document.getElementById('workGstType').value;
-
     if (!date || !name || !weight || !rate) { alert('Please fill all fields!'); return; }
-
     const calc = calculateGst(weight, rate, gstPercent, gstType);
-
-    data.work.push({
-      id: Date.now(),
-      date, name, weight, rate,
-      gstPercent, gstType,
-      base: calc.base,
-      gst: calc.gst,
-      amount: calc.total  // Grand total
+    getActiveRecords().work.push({
+      id: Date.now(), date, name, weight, rate, gstPercent, gstType,
+      base: calc.base, gst: calc.gst, amount: calc.total
     });
-
-    autoSave(); markUnsaved(); render();
+    autoSave(); renderAll();
     document.getElementById('workName').value = '';
     document.getElementById('workWeight').value = '';
     updatePreview();
-    showToast('➕ Work added — click Save to confirm', 'info');
+    showToast('➕ Work added & saved', 'info');
   }
 
   function addAdvance() {
+    if (!data.activeCompanyId) { alert('Please add or select a company first!'); return; }
     const date = document.getElementById('advDate').value;
     const amount = parseFloat(document.getElementById('advAmount').value);
     const note = document.getElementById('advNote').value.trim();
     if (!date || !amount) { alert('Please enter date and amount!'); return; }
-    data.advance.push({ id: Date.now(), date, amount, note });
-    autoSave(); markUnsaved(); render();
+    getActiveRecords().advance.push({ id: Date.now(), date, amount, note });
+    autoSave(); renderAll();
     document.getElementById('advAmount').value = '';
     document.getElementById('advNote').value = '';
-    showToast('➕ Advance added — click Save to confirm', 'info');
+    showToast('➕ Advance added & saved', 'info');
   }
 
   function addPayment() {
+    if (!data.activeCompanyId) { alert('Please add or select a company first!'); return; }
     const date = document.getElementById('payDate').value;
     const amount = parseFloat(document.getElementById('payAmount').value);
     const note = document.getElementById('payNote').value.trim();
     if (!date || !amount) { alert('Please enter date and amount!'); return; }
-    data.payment.push({ id: Date.now(), date, amount, note });
-    autoSave(); markUnsaved(); render();
+    getActiveRecords().payment.push({ id: Date.now(), date, amount, note });
+    autoSave(); renderAll();
     document.getElementById('payAmount').value = '';
     document.getElementById('payNote').value = '';
-    showToast('➕ Payment added — click Save to confirm', 'info');
+    showToast('➕ Payment added & saved', 'info');
   }
 
   function del(type, id) {
-    if (!confirm('Are you sure you want to delete this?')) return;
-    data[type] = data[type].filter(x => x.id !== id);
-    autoSave(); markUnsaved(); render();
-    showToast('🗑️ Deleted — click Save to confirm', 'warn');
+    if (!confirm('Delete this record?')) return;
+    const rec = getActiveRecords();
+    rec[type] = rec[type].filter(x => x.id !== id);
+    autoSave(); renderAll();
+    showToast('🗑️ Deleted', 'warn');
   }
 
   // ===== Render =====
-  function render() {
+  function renderCompanySelector() {
+    const sel = document.getElementById('companySelector');
+    if (!data.companies.length) {
+      sel.innerHTML = '<option value="">-- No companies yet --</option>';
+      document.getElementById('companyCount').textContent = '0 Companies';
+      return;
+    }
+    sel.innerHTML = data.companies.map(c =>
+      `<option value="${c.id}" ${c.id === data.activeCompanyId ? 'selected' : ''}>${c.name}</option>`
+    ).join('');
+    document.getElementById('companyCount').textContent = data.companies.length + (data.companies.length === 1 ? ' Company' : ' Companies');
+  }
+
+  function renderCompanyHeader() {
+    const c = getActiveCompany();
+    const nameEl = document.getElementById('companyNameDisplay');
+    const ownerEl = document.getElementById('companyOwnerDisplay');
+    if (c) {
+      nameEl.textContent = '🏢 ' + c.name;
+      let details = [];
+      if (c.owner) details.push('👤 ' + c.owner);
+      if (c.phone) details.push('📞 ' + c.phone);
+      if (c.address) details.push('📍 ' + c.address);
+      if (c.gst) details.push('🧾 GST: ' + c.gst);
+      if (c.defaultGst) details.push('📊 GST: ' + c.defaultGst + '%');
+      ownerEl.textContent = details.length ? details.join('  •  ') : 'Click "Edit Details" to update';
+    } else {
+      nameEl.textContent = '🏢 No Company Selected';
+      ownerEl.textContent = 'Add a company to get started';
+    }
+  }
+
+  function renderCompanyLabels() {
+    const c = getActiveCompany();
+    const label = c ? `(for ${c.name})` : '';
+    document.getElementById('workCompanyLabel').textContent = label;
+    document.getElementById('advCompanyLabel').textContent = label;
+    document.getElementById('payCompanyLabel').textContent = label;
+    document.getElementById('sumCompanyLabel').textContent = label;
+  }
+
+  function renderAll() {
+    renderCompanySelector();
+    renderCompanyHeader();
+    renderCompanyLabels();
+    renderTables();
+    renderStats();
+    renderSummary();
+    applyDefaultGst();
+    renderAllCompaniesTable();
+    updateAutoSaveStatus();
+  }
+
+  function renderTables() {
+    const rec = getActiveRecords();
+
     const wt = document.getElementById('workTable');
-    if (!data.work.length) wt.innerHTML = '<tr><td colspan="8" class="empty">No work records yet</td></tr>';
-    else wt.innerHTML = data.work.slice().reverse().map(w => {
-      // Handle old records (without GST)
+    document.getElementById('workCount').textContent = rec.work.length;
+    if (!rec.work.length) wt.innerHTML = '<tr><td colspan="8" class="empty">No work records yet</td></tr>';
+    else wt.innerHTML = rec.work.slice().reverse().map(w => {
       const base = w.base !== undefined ? w.base : w.amount;
       const gst = w.gst !== undefined ? w.gst : 0;
-      const total = w.amount;
       const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
       const gstBadge = gstPct > 0
         ? `<span class="badge badge-purple">${gstPct}%</span>`
         : `<span class="badge badge-orange">No GST</span>`;
       return `
         <tr>
-          <td>${w.date}</td>
-          <td>${w.name}</td>
-          <td>${w.weight}</td>
-          <td>₹${w.rate}</td>
-          <td>${fmt(base)}</td>
-          <td>${fmt(gst)} ${gstBadge}</td>
-          <td><b>${fmt(total)}</b></td>
-          <td><button class="btn-red" onclick="del('work',${w.id})">Delete</button></td>
+          <td>${w.date}</td><td>${w.name}</td><td>${w.weight}</td><td>₹${w.rate}</td>
+          <td>${fmt(base)}</td><td>${fmt(gst)} ${gstBadge}</td>
+          <td><b>${fmt(w.amount)}</b></td>
+          <td><div class="action-btns">
+            <button class="btn-whatsapp" onclick="shareWorkItemWhatsApp(${w.id})">📱</button>
+            <button class="btn-red" onclick="del('work',${w.id})">🗑️</button>
+          </div></td>
         </tr>`;
     }).join('');
 
     const at = document.getElementById('advanceTable');
-    if (!data.advance.length) at.innerHTML = '<tr><td colspan="4" class="empty">No advance records yet</td></tr>';
-    else at.innerHTML = data.advance.slice().reverse().map(a => `
+    document.getElementById('advCount').textContent = rec.advance.length;
+    const advTotal = rec.advance.reduce((s, a) => s + a.amount, 0);
+    if (!rec.advance.length) at.innerHTML = '<tr><td colspan="4" class="empty">No advance records</td></tr>';
+    else at.innerHTML = rec.advance.slice().reverse().map(a => `
       <tr><td>${a.date}</td><td><b>${fmt(a.amount)}</b></td><td>${a.note || '-'}</td>
-      <td><button class="btn-red" onclick="del('advance',${a.id})">Delete</button></td></tr>`).join('');
+      <td><button class="btn-red" onclick="del('advance',${a.id})">🗑️ Delete</button></td></tr>`).join('');
+    document.getElementById('advanceTotalBox').textContent = fmt(advTotal);
 
     const pt = document.getElementById('paymentTable');
-    if (!data.payment.length) pt.innerHTML = '<tr><td colspan="4" class="empty">No payment records yet</td></tr>';
-    else pt.innerHTML = data.payment.slice().reverse().map(p => `
+    document.getElementById('payCount').textContent = rec.payment.length;
+    const payTotal = rec.payment.reduce((s, p) => s + p.amount, 0);
+    if (!rec.payment.length) pt.innerHTML = '<tr><td colspan="4" class="empty">No payment records</td></tr>';
+    else pt.innerHTML = rec.payment.slice().reverse().map(p => `
       <tr><td>${p.date}</td><td><b>${fmt(p.amount)}</b></td><td>${p.note || '-'}</td>
-      <td><button class="btn-red" onclick="del('payment',${p.id})">Delete</button></td></tr>`).join('');
+      <td><button class="btn-red" onclick="del('payment',${p.id})">🗑️ Delete</button></td></tr>`).join('');
+    document.getElementById('paymentTotalBox').textContent = fmt(payTotal);
+    document.getElementById('receivedTotalBox').textContent = fmt(advTotal + payTotal);
+  }
 
-    // Stats
-    const totalWeight = data.work.reduce((s, w) => s + w.weight, 0);
-    const totalBase = data.work.reduce((s, w) => s + (w.base !== undefined ? w.base : w.amount), 0);
-    const totalGst = data.work.reduce((s, w) => s + (w.gst !== undefined ? w.gst : 0), 0);
-    const totalGrand = data.work.reduce((s, w) => s + w.amount, 0);
-    const totalAdvance = data.advance.reduce((s, a) => s + a.amount, 0);
-    const totalPayment = data.payment.reduce((s, p) => s + p.amount, 0);
-    const due = totalGrand - totalAdvance - totalPayment;
+  function renderStats() {
+    const rec = getActiveRecords();
+    const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+    const tb = rec.work.reduce((s, w) => s + (w.base !== undefined ? w.base : w.amount), 0);
+    const tg = rec.work.reduce((s, w) => s + (w.gst !== undefined ? w.gst : 0), 0);
+    const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+    const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+    const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+    const received = ta + tp;
+    const due = tgr - received;
 
-    document.getElementById('statWork').textContent = totalWeight.toFixed(2);
-    document.getElementById('statEarning').textContent = fmt(totalBase);
-    document.getElementById('statGst').textContent = fmt(totalGst);
-    document.getElementById('statGrand').textContent = fmt(totalGrand);
-    document.getElementById('statAdvance').textContent = fmt(totalAdvance + totalPayment);
+    document.getElementById('statWork').textContent = tw.toFixed(2);
+    document.getElementById('statEarning').textContent = fmt(tb);
+    document.getElementById('statGst').textContent = fmt(tg);
+    document.getElementById('statGrand').textContent = fmt(tgr);
+    document.getElementById('statAdvance').textContent = fmt(ta);
+    document.getElementById('statPayment').textContent = fmt(tp);
+    document.getElementById('statReceived').textContent = fmt(received);
     document.getElementById('statDue').textContent = fmt(due);
+  }
 
-    // Summary by month
-    const months = {};
-    data.work.forEach(w => {
-      const m = w.date.substring(0, 7);
-      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
-      const base = w.base !== undefined ? w.base : w.amount;
-      const gst = w.gst !== undefined ? w.gst : 0;
-      months[m].weight += w.weight;
-      months[m].base += base;
-      months[m].gst += gst;
-      months[m].grand += w.amount;
-    });
-    data.advance.forEach(a => {
-      const m = a.date.substring(0, 7);
-      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
-      months[m].advance += a.amount;
-    });
-    data.payment.forEach(p => {
-      const m = p.date.substring(0, 7);
-      if (!months[m]) months[m] = { weight: 0, base: 0, gst: 0, grand: 0, advance: 0, payment: 0 };
-      months[m].payment += p.amount;
-    });
-
+  function renderSummary() {
+    const months = buildMonthlySummary();
     const st = document.getElementById('summaryTable');
     const keys = Object.keys(months).sort().reverse();
     if (!keys.length) st.innerHTML = '<tr><td colspan="8" class="empty">No data yet</td></tr>';
@@ -678,81 +1200,139 @@
       const dueM = x.grand - x.advance - x.payment;
       const badge = dueM > 0 ? 'badge-red' : 'badge-green';
       return `<tr>
-        <td><b>${m}</b></td>
+        <td><b>${formatMonth(m)}</b></td>
         <td>${x.weight.toFixed(2)}</td>
         <td>${fmt(x.base)}</td>
         <td>${fmt(x.gst)}</td>
         <td><b>${fmt(x.grand)}</b></td>
-        <td>${fmt(x.advance)}</td>
-        <td>${fmt(x.payment)}</td>
+        <td style="color:#ea580c; font-weight:700;">${fmt(x.advance)}</td>
+        <td style="color:#0891b2; font-weight:700;">${fmt(x.payment)}</td>
         <td><span class="badge ${badge}">${fmt(dueM)}</span></td>
       </tr>`;
     }).join('');
   }
 
+  function renderAllCompaniesTable() {
+    const tbl = document.getElementById('allCompaniesTable');
+    if (!data.companies.length) {
+      tbl.innerHTML = '<tr><td colspan="9" class="empty">No companies yet</td></tr>';
+      document.getElementById('overallWork').textContent = '0 kg';
+      document.getElementById('overallGrand').textContent = '₹0';
+      document.getElementById('overallAdvance').textContent = '₹0';
+      document.getElementById('overallPayment').textContent = '₹0';
+      document.getElementById('overallReceived').textContent = '₹0';
+      document.getElementById('overallBalance').textContent = '₹0';
+      return;
+    }
+    let oWork = 0, oGrand = 0, oAdv = 0, oPay = 0, oDue = 0;
+    tbl.innerHTML = data.companies.map(c => {
+      const rec = data.records[c.id] || { work: [], advance: [], payment: [] };
+      const tw = rec.work.reduce((s, w) => s + w.weight, 0);
+      const tgr = rec.work.reduce((s, w) => s + w.amount, 0);
+      const ta = rec.advance.reduce((s, a) => s + a.amount, 0);
+      const tp = rec.payment.reduce((s, p) => s + p.amount, 0);
+      const due = tgr - ta - tp;
+      oWork += tw; oGrand += tgr; oAdv += ta; oPay += tp; oDue += due;
+      const isActive = c.id === data.activeCompanyId;
+      const dueBadge = due > 0 ? 'badge-red' : 'badge-green';
+      return `<tr style="${isActive ? 'background:#f0fdf4;' : ''}">
+        <td><b>${c.name}</b> ${isActive ? '✅' : ''}</td>
+        <td>${c.owner || '-'}</td>
+        <td>${c.phone || '-'}</td>
+        <td>${tw.toFixed(2)} kg</td>
+        <td><b>${fmt(tgr)}</b></td>
+        <td style="color:#ea580c; font-weight:700;">${fmt(ta)}</td>
+        <td style="color:#0891b2; font-weight:700;">${fmt(tp)}</td>
+        <td><span class="badge ${dueBadge}">${fmt(due)}</span></td>
+        <td><div class="action-btns">
+          ${!isActive ? `<button class="btn-green" onclick="switchCompany(${c.id})">Open</button>` : ''}
+          <button class="btn-blue" onclick="openCompanyModal(${c.id})">Edit</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('overallWork').textContent = oWork.toFixed(2) + ' kg';
+    document.getElementById('overallGrand').textContent = fmt(oGrand);
+    document.getElementById('overallAdvance').textContent = fmt(oAdv);
+    document.getElementById('overallPayment').textContent = fmt(oPay);
+    document.getElementById('overallReceived').textContent = fmt(oAdv + oPay);
+    document.getElementById('overallBalance').textContent = fmt(oDue);
+  }
+
   function clearAll() {
-    if (!confirm('All data will be permanently deleted. Are you sure?')) return;
-    data = { work: [], advance: [], payment: [], company: data.company };
-    autoSave(); render();
-    showToast('🗑️ All data cleared', 'warn');
+    if (!data.activeCompanyId) { alert('No company selected!'); return; }
+    const c = getActiveCompany();
+    if (!confirm(`Delete ALL records of "${c.name}"?\n\n(Company itself will remain)`)) return;
+    data.records[data.activeCompanyId] = { work: [], advance: [], payment: [] };
+    autoSave(); renderAll();
+    showToast('🗑️ Records cleared', 'warn');
   }
 
   function exportData() {
-    let csv = '';
-    if (data.company.name) {
-      csv += `Company,${data.company.name}\n`;
-      if (data.company.owner) csv += `Owner,${data.company.owner}\n`;
-      if (data.company.phone) csv += `Phone,${data.company.phone}\n`;
-      if (data.company.address) csv += `Address,${data.company.address}\n`;
-      if (data.company.gst) csv += `GST Number,${data.company.gst}\n`;
-      csv += `\n`;
-    }
-    csv += 'Type,Date,Detail,Weight,Rate,Base Amount,GST %,GST Amount,Total,Note\n';
-    data.work.forEach(w => {
+    const c = getActiveCompany();
+    if (!c) { alert('No company selected!'); return; }
+    const rec = getActiveRecords();
+    let csv = `Company,${c.name}\n`;
+    if (c.owner) csv += `Owner,${c.owner}\n`;
+    if (c.phone) csv += `Phone,${c.phone}\n`;
+    if (c.address) csv += `Address,${c.address}\n`;
+    if (c.gst) csv += `GST,${c.gst}\n`;
+    csv += `\nType,Date,Detail,Weight,Rate,Base Amount,GST %,GST Amount,Total,Note\n`;
+    rec.work.forEach(w => {
       const base = w.base !== undefined ? w.base : w.amount;
       const gst = w.gst !== undefined ? w.gst : 0;
       const gstPct = w.gstPercent !== undefined ? w.gstPercent : 0;
       csv += `Work,${w.date},${w.name},${w.weight},${w.rate},${base},${gstPct},${gst},${w.amount},\n`;
     });
-    data.advance.forEach(a => csv += `Advance,${a.date},,,,${a.amount},,,,${a.note||''}\n`);
-    data.payment.forEach(p => csv += `Payment,${p.date},,,,${p.amount},,,,${p.note||''}\n`);
-
+    rec.advance.forEach(a => csv += `Advance,${a.date},,,,${a.amount},,,,${a.note||''}\n`);
+    rec.payment.forEach(p => csv += `Payment,${p.date},,,,${p.amount},,,,${p.note||''}\n`);
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    const companyName = data.company.name ? data.company.name.replace(/\s+/g, '_') : 'fabrication';
-    link.download = `${companyName}_data_${today()}.csv`;
+    link.download = `${c.name.replace(/\s+/g, '_')}_data_${today()}.csv`;
     link.click();
     showToast('📥 CSV downloaded!', 'info');
   }
 
-  // ===== Warn before leaving if unsaved =====
+  // ===== Events =====
   window.addEventListener('beforeunload', (e) => {
-    if (hasUnsavedChanges) {
-      e.preventDefault();
-      e.returnValue = '';
-    }
+    if (hasUnsavedChanges) { autoSave(); }
   });
 
-  // ===== Keyboard shortcut Ctrl+S =====
   document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-      e.preventDefault();
-      manualSave();
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); manualSave(); }
+    if (e.key === 'Escape') {
+      closeCompanyModal();
+      closeWhatsAppModal();
+      closeManageCompaniesModal();
     }
-    if (e.key === 'Escape') closeCompanyModal();
   });
 
-  document.getElementById('companyModal').addEventListener('click', (e) => {
-    if (e.target.id === 'companyModal') closeCompanyModal();
+  ['companyModal', 'waModal', 'manageCompaniesModal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', (e) => {
+      if (e.target.id === id) {
+        if (id === 'companyModal') closeCompanyModal();
+        if (id === 'waModal') closeWhatsAppModal();
+        if (id === 'manageCompaniesModal') closeManageCompaniesModal();
+      }
+    });
   });
 
   // ===== Init =====
-  render();
-  renderCompany();
-  applyDefaultGst();
-  updateSaveStatus();
+  document.getElementById('workDate').value = today();
+  document.getElementById('advDate').value = today();
+  document.getElementById('payDate').value = today();
+
+  renderAll();
+  updateAutoSaveStatus();
   updatePreview();
+
+  if (!data.companies.length) {
+    setTimeout(() => {
+      if (confirm('👋 Welcome!\n\nNo companies yet. Add your first company now?')) {
+        openCompanyModal();
+      }
+    }, 500);
+  }
 </script>
 </body>
 </html>

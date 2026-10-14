@@ -127,7 +127,6 @@
   .tab-total-box.green .tt-label { color:#15803d; }
   .tab-total-box.green .tt-value { color:#16a34a; }
 
-  /* Big Total Overview */
   .total-big-box { background: linear-gradient(135deg, #1a4d8f 0%, #2563eb 100%); color: #fff; border-radius: 12px; padding: 22px; margin-bottom: 15px; box-shadow: 0 6px 20px rgba(26,77,143,0.3); }
   .total-big-box h3 { font-size: 16px; margin-bottom: 15px; opacity: 0.95; text-align: center; letter-spacing: 1px; }
   .total-big-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
@@ -184,7 +183,6 @@
   .excel-option .eo-desc { font-size: 11px; color: #666; }
   .excel-option input { width: auto; margin-right: 6px; }
 
-  /* Rank/position styling */
   .rank-1 { background: linear-gradient(90deg, #fef3c7 0%, #fff 100%); border-left: 4px solid #f59e0b; }
   .rank-2 { background: linear-gradient(90deg, #e5e7eb 0%, #fff 100%); border-left: 4px solid #9ca3af; }
   .rank-3 { background: linear-gradient(90deg, #fed7aa 0%, #fff 100%); border-left: 4px solid #ea580c; }
@@ -464,7 +462,7 @@
     </div>
   </div>
 
-  <!-- 🎯 TOTAL OVERVIEW TAB -->
+  <!-- TOTAL OVERVIEW TAB -->
   <div id="tab-totalOverview" class="tab-content">
     <div class="total-big-box">
       <h3>🎯 TOTAL BUSINESS OVERVIEW — ALL COMPANIES</h3>
@@ -617,7 +615,7 @@
     </div>
 
     <div class="card">
-      <h2>📊 Excel Import (New!)</h2>
+      <h2>📊 Excel Import</h2>
       <div style="font-size:13px; color:#555; line-height:1.8;">
         <p><b>Excel file se data import karein:</b></p>
         <p>1. ✅ Excel file select karein (.xlsx, .xls, .csv)</p>
@@ -710,9 +708,9 @@
   </div>
 </div>
 
-<!-- 📊 EXCEL IMPORT PREVIEW MODAL -->
+<!-- EXCEL IMPORT PREVIEW MODAL -->
 <div class="modal-overlay" id="excelImportModal">
-  <div class="modal" style="max-width: 700px;">
+  <div class="modal" style="max-width: 750px;">
     <h3>📊 Excel Import Preview</h3>
     
     <div style="background:#f0f9ff; border-left:4px solid #2563eb; padding:10px; border-radius:6px; margin-bottom:12px; font-size:12px;">
@@ -739,12 +737,12 @@
       </div>
     </div>
 
-    <div id="excelPreviewDetails" style="max-height:250px; overflow-y:auto; background:#f8fafc; border-radius:6px; padding:10px; font-size:12px; margin-bottom:12px;">
+    <div id="excelPreviewDetails" style="max-height:280px; overflow-y:auto; background:#f8fafc; border-radius:6px; padding:10px; font-size:12px; margin-bottom:12px;">
     </div>
 
     <div class="modal-btns">
       <button class="btn-gray" onclick="closeExcelImportModal()">Cancel</button>
-      <button class="btn-excel" onclick="confirmExcelImport()">📥 Import Data</button>
+      <button class="btn-excel" id="excelImportConfirmBtn" onclick="confirmExcelImport()">📥 Import Data</button>
     </div>
   </div>
 </div>
@@ -1378,10 +1376,10 @@
   // ===== GENERATE EXCEL WORKBOOK =====
   function generateExcelWorkbook() {
     const wb = XLSX.utils.book_new();
-    const usedNames = new Set(['Overall Summary', 'Company Comparison', 'Month-wise Summary']);
+    const usedNames = new Set(['Overall Summary', 'Company Comparison', 'Month-wise Summary', 'Total Overview']);
 
     const wsTotal = buildTotalOverviewSheet();
-    XLSX.utils.book_append_sheet(wb, wsTotal, '🎯 Total Overview');
+    XLSX.utils.book_append_sheet(wb, wsTotal, 'Total Overview');
 
     const wsOverall = buildOverallSheet();
     XLSX.utils.book_append_sheet(wb, wsOverall, 'Overall Summary');
@@ -1411,7 +1409,7 @@
 
   function buildTotalOverviewSheet() {
     const ws_data = [];
-    ws_data.push(['🎯 TOTAL BUSINESS OVERVIEW - ALL COMPANIES']);
+    ws_data.push(['TOTAL BUSINESS OVERVIEW - ALL COMPANIES']);
     ws_data.push(['Report Generated', new Date().toLocaleString()]);
     ws_data.push(['Total Companies', data.companies.length]);
     ws_data.push([]);
@@ -1594,7 +1592,7 @@
 
   function buildOverallSheet() {
     const ws_data = [];
-    ws_data.push(['📊 OVERALL SUMMARY - ALL COMPANIES']);
+    ws_data.push(['OVERALL SUMMARY - ALL COMPANIES']);
     ws_data.push(['Report Generated', new Date().toLocaleString()]);
     ws_data.push(['Total Companies', data.companies.length]);
     ws_data.push([]);
@@ -1618,7 +1616,7 @@
 
   function buildMonthlySheet() {
     const ws_data = [];
-    ws_data.push(['📅 MONTH-WISE SUMMARY - ALL COMPANIES']);
+    ws_data.push(['MONTH-WISE SUMMARY - ALL COMPANIES']);
     ws_data.push(['Report Generated', new Date().toLocaleString()]);
     ws_data.push([]);
     ws_data.push(['Company', 'Month', 'Work (kg)', 'Base (₹)', 'GST (₹)', 'Grand Total (₹)', 'Advance (₹)', 'Payment (₹)', 'Balance (₹)']);
@@ -1637,7 +1635,7 @@
 
   function buildComparisonSheet() {
     const ws_data = [];
-    ws_data.push(['⚖️ COMPANY COMPARISON']);
+    ws_data.push(['COMPANY COMPARISON']);
     ws_data.push([]);
     ws_data.push(['Metric', ...data.companies.map(c => c.name)]);
     const rows = [
@@ -2006,7 +2004,7 @@
     reader.readAsText(file);
   }
 
-  // ===== 📊 EXCEL IMPORT =====
+  // ===== EXCEL IMPORT =====
   function importExcelFile(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -2017,12 +2015,6 @@
         const wb = XLSX.read(ev.target.result, { type: 'array', cellDates: true });
         const parsed = parseExcelWorkbook(wb, file.name);
         
-        if (!parsed.work.length && !parsed.advance.length && !parsed.payment.length) {
-          alert('❌ Excel me koi valid data nahi mila!\n\nExpected columns:\n- Work: Date, Work Name, Weight, Rate\n- Advance: Date, Amount\n- Payment: Date, Amount');
-          e.target.value = '';
-          return;
-        }
-
         excelImportData = parsed;
         showExcelImportPreview(file.name, parsed);
       } catch (err) {
@@ -2035,45 +2027,47 @@
   }
 
   function parseExcelWorkbook(wb, filename) {
-    const result = { work: [], advance: [], payment: [], detectedCompany: null };
+    const result = { work: [], advance: [], payment: [], detectedCompany: null, allSheets: [] };
 
     wb.SheetNames.forEach(sheetName => {
       const sheet = wb.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
       
+      result.allSheets.push({ name: sheetName, rows: rows });
+      
       const sheetLower = sheetName.toLowerCase();
       
-      // Company name detection
       rows.forEach(r => {
         if (r[0] && String(r[0]).toLowerCase().includes('company name') && r[1]) {
           result.detectedCompany = String(r[1]).trim();
         }
       });
 
-      // Detect Work records
-      if (sheetLower.includes('work') || sheetLower.includes('fab') || sheetLower === 'sheet1') {
-        const workRows = extractWorkRows(rows);
-        result.work.push(...workRows);
+      if (sheetLower.includes('work') || sheetLower.includes('fab')) {
+        result.work.push(...extractWorkRows(rows));
       }
-      
-      // Detect Advance
       if (sheetLower.includes('advance') || sheetLower.includes('adv')) {
-        const advRows = extractAdvanceRows(rows);
-        result.advance.push(...advRows);
+        result.advance.push(...extractAdvanceRows(rows));
       }
-      
-      // Detect Payment
       if (sheetLower.includes('payment') || sheetLower.includes('pay')) {
-        const payRows = extractPaymentRows(rows);
-        result.payment.push(...payRows);
+        result.payment.push(...extractPaymentRows(rows));
       }
     });
 
-    // Fallback: agar kuch detect nahi hua toh pehli sheet se sab nikaalo
-    if (!result.work.length && !result.advance.length && !result.payment.length && wb.SheetNames.length) {
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
-      const workRows = extractWorkRows(rows);
-      result.work.push(...workRows);
+    if (!result.work.length && !result.advance.length && !result.payment.length) {
+      result.allSheets.forEach(s => {
+        if (!result.work.length) {
+          const w = extractWorkRows(s.rows);
+          if (w.length) result.work.push(...w);
+        }
+      });
+    }
+
+    if (!result.work.length && !result.advance.length && !result.payment.length && result.allSheets.length) {
+      const first = result.allSheets[0];
+      result.work.push(...extractWorkRows(first.rows));
+      result.advance.push(...extractAdvanceRows(first.rows));
+      result.payment.push(...extractPaymentRows(first.rows));
     }
 
     return result;
@@ -2081,9 +2075,9 @@
 
   function findColumnIndex(headers, keywords) {
     for (let i = 0; i < headers.length; i++) {
-      const h = String(headers[i] || '').toLowerCase();
+      const h = String(headers[i] || '').toLowerCase().trim();
       for (const kw of keywords) {
-        if (h.includes(kw.toLowerCase())) return i;
+        if (h === kw.toLowerCase() || h.includes(kw.toLowerCase())) return i;
       }
     }
     return -1;
@@ -2091,18 +2085,38 @@
 
   function parseDate(val) {
     if (!val) return '';
-    if (val instanceof Date) return val.toISOString().split('T')[0];
+    if (val instanceof Date) {
+      const y = val.getFullYear();
+      const m = String(val.getMonth() + 1).padStart(2, '0');
+      const d = String(val.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
     const s = String(val).trim();
+    if (!s) return '';
+    
     if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0, 10);
-    const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+    
+    const m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
     if (m) {
       let [_, d, mo, y] = m;
       if (y.length === 2) y = '20' + y;
+      if (parseInt(d) > 12) {
+        return `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
+      }
+      if (parseInt(mo) > 12) {
+        return `${y}-${d.padStart(2, '0')}-${mo.padStart(2, '0')}`;
+      }
       return `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
     }
+    
     const dt = new Date(s);
-    if (!isNaN(dt.getTime())) return dt.toISOString().split('T')[0];
-    return new Date().toISOString().split('T')[0];
+    if (!isNaN(dt.getTime())) {
+      const y = dt.getFullYear();
+      const mo = String(dt.getMonth() + 1).padStart(2, '0');
+      const d = String(dt.getDate()).padStart(2, '0');
+      return `${y}-${mo}-${d}`;
+    }
+    return '';
   }
 
   function parseNumber(val) {
@@ -2117,10 +2131,10 @@
     let headers = [];
     
     for (let i = 0; i < Math.min(rows.length, 30); i++) {
-      const row = rows[i].map(c => String(c || '').toLowerCase());
-      const hasDate = row.some(c => c.includes('date'));
-      const hasWork = row.some(c => c.includes('work') || c.includes('weight') || c.includes('item') || c.includes('name'));
-      if (hasDate && hasWork) {
+      const row = rows[i].map(c => String(c || '').toLowerCase().trim());
+      const hasDate = row.some(c => /date|tarikh|din|तारीख|दिन/.test(c));
+      const hasWorkData = row.some(c => /work|weight|wt|kg|rate|price|amount|qty|quantity|item|structure|नाम|वजन|दर|रकम/.test(c));
+      if (hasDate && hasWorkData) {
         headerRow = i;
         headers = rows[i];
         break;
@@ -2129,14 +2143,17 @@
     
     if (headerRow === -1) return work;
     
-    const dateCol = findColumnIndex(headers, ['date', 'tarikh']);
-    const nameCol = findColumnIndex(headers, ['work name', 'work', 'structure', 'item', 'name']);
-    const weightCol = findColumnIndex(headers, ['weight', 'kg']);
-    const rateCol = findColumnIndex(headers, ['rate', 'price', 'per kg']);
-    const baseCol = findColumnIndex(headers, ['base', 'amount', 'earning']);
-    const gstPctCol = findColumnIndex(headers, ['gst %', 'gst%', 'gst rate', 'tax %']);
-    const gstAmtCol = findColumnIndex(headers, ['gst amount', 'gst amt', 'tax amount', 'gst']);
-    const totalCol = findColumnIndex(headers, ['total', 'grand']);
+    const dateCol = findColumnIndex(headers, ['date', 'tarikh', 'din', 'तारीख', 'दिन']);
+    const nameCol = findColumnIndex(headers, ['work name', 'work', 'structure', 'item', 'name', 'particular', 'description', 'kam', 'काम', 'नाम']);
+    const weightCol = findColumnIndex(headers, ['weight', 'wt', 'kg', 'wgt', 'वजन', 'किलो']);
+    const rateCol = findColumnIndex(headers, ['rate', 'price', 'per kg', 'perkg', 'दर', 'रेट']);
+    const baseCol = findColumnIndex(headers, ['base', 'basic', 'amount', 'earning', 'मूल', 'आधार']);
+    const gstPctCol = findColumnIndex(headers, ['gst %', 'gst%', 'gst rate', 'tax %', 'tax%', 'gst pr', 'जीएसटी']);
+    const gstAmtCol = findColumnIndex(headers, ['gst amount', 'gst amt', 'tax amount', 'tax amt']);
+    const totalCol = findColumnIndex(headers, ['total', 'grand', 'net', 'कुल', 'टोटल']);
+    
+    let gstAmtColSafe = gstAmtCol;
+    if (gstAmtColSafe === baseCol || gstAmtColSafe === totalCol) gstAmtColSafe = -1;
     
     for (let i = headerRow + 1; i < rows.length; i++) {
       const row = rows[i];
@@ -2147,18 +2164,19 @@
       const weightVal = weightCol >= 0 ? parseNumber(row[weightCol]) : 0;
       const rateVal = rateCol >= 0 ? parseNumber(row[rateCol]) : 0;
       
-      if (String(nameVal).toLowerCase().includes('total') || String(dateVal).toLowerCase().includes('total')) continue;
+      const rowText = row.map(c => String(c || '').toLowerCase()).join(' ');
+      if (rowText.includes('total') || rowText.includes('कुल')) continue;
       if (!dateVal && !nameVal && !weightVal && !rateVal) continue;
-      if (!nameVal && !weightVal) continue;
+      if (!dateVal && !nameVal && !weightVal) continue;
       
       const gstPercent = gstPctCol >= 0 ? parseNumber(row[gstPctCol]) : 0;
       const baseAmt = baseCol >= 0 ? parseNumber(row[baseCol]) : (weightVal * rateVal);
-      const gstAmt = gstAmtCol >= 0 ? parseNumber(row[gstAmtCol]) : (baseAmt * gstPercent / 100);
+      const gstAmt = gstAmtColSafe >= 0 ? parseNumber(row[gstAmtColSafe]) : (baseAmt * gstPercent / 100);
       const totalAmt = totalCol >= 0 ? parseNumber(row[totalCol]) : (baseAmt + gstAmt);
       
       work.push({
         id: Date.now() + Math.random(),
-        date: parseDate(dateVal),
+        date: parseDate(dateVal) || new Date().toISOString().split('T')[0],
         name: String(nameVal || 'Imported Work').trim(),
         weight: weightVal,
         rate: rateVal,
@@ -2179,9 +2197,9 @@
     let headers = [];
     
     for (let i = 0; i < Math.min(rows.length, 30); i++) {
-      const row = rows[i].map(c => String(c || '').toLowerCase());
-      const hasDate = row.some(c => c.includes('date'));
-      const hasAmount = row.some(c => c.includes('amount') || c.includes('advance'));
+      const row = rows[i].map(c => String(c || '').toLowerCase().trim());
+      const hasDate = row.some(c => /date|tarikh|तारीख/.test(c));
+      const hasAmount = row.some(c => /amount|amt|advance|adv|₹|रकम|पेशगी/.test(c));
       if (hasDate && hasAmount) {
         headerRow = i;
         headers = rows[i];
@@ -2191,9 +2209,9 @@
     
     if (headerRow === -1) return advance;
     
-    const dateCol = findColumnIndex(headers, ['date']);
-    const amountCol = findColumnIndex(headers, ['amount', 'advance', '₹']);
-    const noteCol = findColumnIndex(headers, ['note', 'remark', 'description']);
+    const dateCol = findColumnIndex(headers, ['date', 'tarikh', 'तारीख']);
+    const amountCol = findColumnIndex(headers, ['amount', 'amt', 'advance', 'adv', '₹', 'रकम', 'पेशगी']);
+    const noteCol = findColumnIndex(headers, ['note', 'remark', 'description', 'details', 'टिप्पणी']);
     
     for (let i = headerRow + 1; i < rows.length; i++) {
       const row = rows[i];
@@ -2203,13 +2221,14 @@
       const amountVal = amountCol >= 0 ? parseNumber(row[amountCol]) : 0;
       const noteVal = noteCol >= 0 ? row[noteCol] : '';
       
-      if (String(dateVal).toLowerCase().includes('total') || String(noteVal).toLowerCase().includes('total')) continue;
+      const rowText = row.map(c => String(c || '').toLowerCase()).join(' ');
+      if (rowText.includes('total') || rowText.includes('कुल')) continue;
       if (!dateVal && !amountVal) continue;
       if (amountVal <= 0) continue;
       
       advance.push({
         id: Date.now() + Math.random(),
-        date: parseDate(dateVal),
+        date: parseDate(dateVal) || new Date().toISOString().split('T')[0],
         amount: amountVal,
         note: String(noteVal || '').trim()
       });
@@ -2224,9 +2243,9 @@
     let headers = [];
     
     for (let i = 0; i < Math.min(rows.length, 30); i++) {
-      const row = rows[i].map(c => String(c || '').toLowerCase());
-      const hasDate = row.some(c => c.includes('date'));
-      const hasAmount = row.some(c => c.includes('amount') || c.includes('payment'));
+      const row = rows[i].map(c => String(c || '').toLowerCase().trim());
+      const hasDate = row.some(c => /date|tarikh|तारीख/.test(c));
+      const hasAmount = row.some(c => /amount|amt|payment|pay|₹|रकम|भुगतान/.test(c));
       if (hasDate && hasAmount) {
         headerRow = i;
         headers = rows[i];
@@ -2236,9 +2255,9 @@
     
     if (headerRow === -1) return payment;
     
-    const dateCol = findColumnIndex(headers, ['date']);
-    const amountCol = findColumnIndex(headers, ['amount', 'payment', '₹']);
-    const noteCol = findColumnIndex(headers, ['note', 'remark', 'description']);
+    const dateCol = findColumnIndex(headers, ['date', 'tarikh', 'तारीख']);
+    const amountCol = findColumnIndex(headers, ['amount', 'amt', 'payment', 'pay', '₹', 'रकम', 'भुगतान']);
+    const noteCol = findColumnIndex(headers, ['note', 'remark', 'description', 'details', 'टिप्पणी']);
     
     for (let i = headerRow + 1; i < rows.length; i++) {
       const row = rows[i];
@@ -2248,13 +2267,14 @@
       const amountVal = amountCol >= 0 ? parseNumber(row[amountCol]) : 0;
       const noteVal = noteCol >= 0 ? row[noteCol] : '';
       
-      if (String(dateVal).toLowerCase().includes('total') || String(noteVal).toLowerCase().includes('total')) continue;
+      const rowText = row.map(c => String(c || '').toLowerCase()).join(' ');
+      if (rowText.includes('total') || rowText.includes('कुल')) continue;
       if (!dateVal && !amountVal) continue;
       if (amountVal <= 0) continue;
       
       payment.push({
         id: Date.now() + Math.random(),
-        date: parseDate(dateVal),
+        date: parseDate(dateVal) || new Date().toISOString().split('T')[0],
         amount: amountVal,
         note: String(noteVal || '').trim()
       });
@@ -2276,35 +2296,65 @@
     }
 
     let html = '';
-    if (parsed.work.length) {
-      html += `<div style="margin-bottom:8px;"><b>📦 Work Records (${parsed.work.length}):</b></div>`;
-      html += '<table style="width:100%; font-size:11px; margin-bottom:10px; border-collapse:collapse;"><tr style="background:#e8eef7;"><th style="padding:4px;text-align:left;">Date</th><th style="padding:4px;text-align:left;">Name</th><th style="padding:4px;text-align:left;">Weight</th><th style="padding:4px;text-align:left;">Rate</th><th style="padding:4px;text-align:left;">Total</th></tr>';
-      parsed.work.slice(0, 5).forEach(w => {
-        html += `<tr><td style="padding:4px;">${w.date}</td><td style="padding:4px;">${w.name}</td><td style="padding:4px;">${w.weight}</td><td style="padding:4px;">₹${w.rate}</td><td style="padding:4px;">₹${w.amount.toFixed(2)}</td></tr>`;
+    
+    if (total === 0) {
+      html += `<div style="background:#fee2e2; border-left:4px solid #dc2626; padding:10px; border-radius:6px; margin-bottom:10px; font-size:12px;">
+        <b>⚠️ Auto-detect fail ho gaya!</b><br>
+        Neeche aapki Excel sheet ka preview hai. Check karein ki columns ka naam kya hai:
+      </div>`;
+      
+      parsed.allSheets.forEach(s => {
+        html += `<div style="margin-bottom:12px;"><b>📄 Sheet: ${s.name}</b></div>`;
+        html += '<table style="width:100%; font-size:11px; border-collapse:collapse; border:1px solid #ccc;">';
+        s.rows.slice(0, 8).forEach((row, ri) => {
+          html += '<tr>';
+          row.slice(0, 8).forEach(cell => {
+            const bg = ri === 0 ? '#dbeafe' : '#fff';
+            html += `<td style="border:1px solid #ddd; padding:3px; background:${bg};">${String(cell || '').substring(0, 20)}</td>`;
+          });
+          html += '</tr>';
+        });
+        html += '</table>';
       });
-      if (parsed.work.length > 5) html += `<tr><td colspan="5" style="text-align:center; color:#888; padding:4px;">... +${parsed.work.length - 5} more</td></tr>`;
-      html += '</table>';
-    }
-    if (parsed.advance.length) {
-      html += `<div style="margin-bottom:8px;"><b>💰 Advance Records (${parsed.advance.length}):</b></div>`;
-      html += '<table style="width:100%; font-size:11px; margin-bottom:10px; border-collapse:collapse;"><tr style="background:#ffedd5;"><th style="padding:4px;text-align:left;">Date</th><th style="padding:4px;text-align:left;">Amount</th><th style="padding:4px;text-align:left;">Note</th></tr>';
-      parsed.advance.slice(0, 5).forEach(a => {
-        html += `<tr><td style="padding:4px;">${a.date}</td><td style="padding:4px;">₹${a.amount.toFixed(2)}</td><td style="padding:4px;">${a.note || '-'}</td></tr>`;
-      });
-      if (parsed.advance.length > 5) html += `<tr><td colspan="3" style="text-align:center; color:#888; padding:4px;">... +${parsed.advance.length - 5} more</td></tr>`;
-      html += '</table>';
-    }
-    if (parsed.payment.length) {
-      html += `<div style="margin-bottom:8px;"><b>💵 Payment Records (${parsed.payment.length}):</b></div>`;
-      html += '<table style="width:100%; font-size:11px; border-collapse:collapse;"><tr style="background:#cffafe;"><th style="padding:4px;text-align:left;">Date</th><th style="padding:4px;text-align:left;">Amount</th><th style="padding:4px;text-align:left;">Note</th></tr>';
-      parsed.payment.slice(0, 5).forEach(p => {
-        html += `<tr><td style="padding:4px;">${p.date}</td><td style="padding:4px;">₹${p.amount.toFixed(2)}</td><td style="padding:4px;">${p.note || '-'}</td></tr>`;
-      });
-      if (parsed.payment.length > 5) html += `<tr><td colspan="3" style="text-align:center; color:#888; padding:4px;">... +${parsed.payment.length - 5} more</td></tr>`;
-      html += '</table>';
+      
+      html += `<div style="margin-top:12px; padding:10px; background:#fef3c7; border-radius:6px; font-size:12px;">
+        <b>💡 Solution:</b><br>
+        Excel me columns ke naam aise rakhein:<br>
+        ✅ <b>Work Sheet:</b> Date | Work Name | Weight | Rate<br>
+        ✅ <b>Advance Sheet:</b> Date | Amount | Note<br>
+        ✅ <b>Payment Sheet:</b> Date | Amount | Note
+      </div>`;
+    } else {
+      if (parsed.work.length) {
+        html += `<div style="margin-bottom:8px;"><b>📦 Work Records (${parsed.work.length}):</b></div>`;
+        html += '<table style="width:100%; font-size:11px; margin-bottom:10px; border-collapse:collapse;"><tr style="background:#e8eef7;"><th style="padding:4px;text-align:left;">Date</th><th style="padding:4px;text-align:left;">Name</th><th style="padding:4px;text-align:left;">Weight</th><th style="padding:4px;text-align:left;">Rate</th><th style="padding:4px;text-align:left;">Total</th></tr>';
+        parsed.work.slice(0, 5).forEach(w => {
+          html += `<tr><td style="padding:4px;">${w.date}</td><td style="padding:4px;">${w.name}</td><td style="padding:4px;">${w.weight}</td><td style="padding:4px;">₹${w.rate}</td><td style="padding:4px;">₹${w.amount.toFixed(2)}</td></tr>`;
+        });
+        if (parsed.work.length > 5) html += `<tr><td colspan="5" style="text-align:center; color:#888; padding:4px;">... +${parsed.work.length - 5} more</td></tr>`;
+        html += '</table>';
+      }
+      if (parsed.advance.length) {
+        html += `<div style="margin-bottom:8px;"><b>💰 Advance Records (${parsed.advance.length}):</b></div>`;
+        html += '<table style="width:100%; font-size:11px; margin-bottom:10px; border-collapse:collapse;"><tr style="background:#ffedd5;"><th style="padding:4px;text-align:left;">Date</th><th style="padding:4px;text-align:left;">Amount</th><th style="padding:4px;text-align:left;">Note</th></tr>';
+        parsed.advance.slice(0, 5).forEach(a => {
+          html += `<tr><td style="padding:4px;">${a.date}</td><td style="padding:4px;">₹${a.amount.toFixed(2)}</td><td style="padding:4px;">${a.note || '-'}</td></tr>`;
+        });
+        if (parsed.advance.length > 5) html += `<tr><td colspan="3" style="text-align:center; color:#888; padding:4px;">... +${parsed.advance.length - 5} more</td></tr>`;
+        html += '</table>';
+      }
+      if (parsed.payment.length) {
+        html += `<div style="margin-bottom:8px;"><b>💵 Payment Records (${parsed.payment.length}):</b></div>`;
+        html += '<table style="width:100%; font-size:11px; border-collapse:collapse;"><tr style="background:#cffafe;"><th style="padding:4px;text-align:left;">Date</th><th style="padding:4px;text-align:left;">Amount</th><th style="padding:4px;text-align:left;">Note</th></tr>';
+        parsed.payment.slice(0, 5).forEach(p => {
+          html += `<tr><td style="padding:4px;">${p.date}</td><td style="padding:4px;">₹${p.amount.toFixed(2)}</td><td style="padding:4px;">${p.note || '-'}</td></tr>`;
+        });
+        if (parsed.payment.length > 5) html += `<tr><td colspan="3" style="text-align:center; color:#888; padding:4px;">... +${parsed.payment.length - 5} more</td></tr>`;
+        html += '</table>';
+      }
     }
     
-    document.getElementById('excelPreviewDetails').innerHTML = html || '<div class="empty">No data</div>';
+    document.getElementById('excelPreviewDetails').innerHTML = html;
 
     const targetSel = document.getElementById('excelImportTarget');
     targetSel.innerHTML = '<option value="__new__">➕ Create New Company</option>';
@@ -2318,6 +2368,19 @@
     };
     targetSel.value = '__new__';
     document.getElementById('excelNewCompanyFields').style.display = 'grid';
+
+    const importBtn = document.getElementById('excelImportConfirmBtn');
+    if (total === 0) {
+      importBtn.disabled = true;
+      importBtn.style.opacity = '0.5';
+      importBtn.style.cursor = 'not-allowed';
+      importBtn.textContent = '❌ No Data Found';
+    } else {
+      importBtn.disabled = false;
+      importBtn.style.opacity = '1';
+      importBtn.style.cursor = 'pointer';
+      importBtn.textContent = '📥 Import Data';
+    }
 
     document.getElementById('excelImportModal').classList.add('show');
   }
